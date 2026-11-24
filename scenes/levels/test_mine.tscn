@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 [ext_resource type="Script" path="res://scripts/levels/test_mine.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/player/ship.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/collision_debug.gd" id="4"]
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
 background_color = Color(0.015, 0.025, 0.04, 1)
@@ -17,3 +18,6 @@ environment = SubResource("Environment")
 position = Vector3(0, 0, 5)
 [node name="HUD" parent="." instance=ExtResource("3")]
 ship_path = NodePath("../Ship")
+
+[node name="CollisionDebug" type="Node3D" parent="."]
+script = ExtResource("4")

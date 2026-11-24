@@ -11,9 +11,14 @@ config_version=5
 [application]
 
 config/name="ProjectMine"
-run/main_scene="res://scenes/levels/test_mine.tscn"
+config/version="1.1"
+run/main_scene="res://scenes/levels/deep_mine.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+FeedbackSettings="*res://scripts/systems/feedback_settings.gd"
 
 [display]
 
@@ -31,3 +36,9 @@ window/stretch/aspect="expand"
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[layer_names]
+
+3d_physics/layer_1="Level geometry"
+3d_physics/layer_2="Player ship"
+3d_physics/layer_3="Enemy drones"

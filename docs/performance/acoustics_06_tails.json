@@ -1,0 +1,38 @@
+{
+  "ambience_muted_for_tail_test": true,
+  "events": 0,
+  "profiles": [
+    {
+      "area": "chamber",
+      "damping": 0.620016339601697,
+      "room_size": 0.73994190363841,
+      "wet": 0.129988199176552
+    },
+    {
+      "area": "concrete",
+      "damping": 0.849117054441425,
+      "room_size": 0.351497051883267,
+      "wet": 0.0552878921802262
+    },
+    {
+      "area": "shaft",
+      "damping": 0.421647451808844,
+      "room_size": 0.877970989200166,
+      "wet": 0.159597992786234
+    },
+    {
+      "area": "steel",
+      "damping": 0.300467024818635,
+      "room_size": 0.302218926844697,
+      "wet": 0.0703439816100449
+    },
+    {
+      "area": "open",
+      "damping": 0.798060223463721,
+      "room_size": 0.100785252523805,
+      "wet": 0.000273158353452115
+    }
+  ],
+  "ray_count": 3,
+  "sources": 7
+}

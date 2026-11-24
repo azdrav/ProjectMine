@@ -1,0 +1,47 @@
+{
+  "headless_tests": {
+    "deep_mine_smoke": true,
+    "physical_hit_smoke": true,
+    "cockpit_smoke": true,
+    "camera_feedback_smoke": true,
+    "heavy_cannon_smoke": true,
+    "combat_smoke": true,
+    "industrial_audio_smoke": true,
+    "lighting_combat_vfx_smoke": true,
+    "proximity_mouse_smoke": true,
+    "signal_lost_smoke": true,
+    "prototype_smoke": true,
+    "collision_geometry_smoke": true,
+    "environment_audio_smoke": true,
+    "dynamic_ai_smoke": true,
+    "drone_model_smoke": true,
+    "parking_audio_smoke": true,
+    "industrial_visuals_smoke": true
+  },
+  "combat": {
+    "draw_calls": 210.049668874172,
+    "enemy_damage": [
+      560.0,
+      540.0
+    ],
+    "enemy_shots": [
+      6,
+      6
+    ],
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "health_overrides": "benchmark only; production balance unchanged",
+    "mean_fps": 100.539015629822,
+    "mean_ms": 9.94638741721855,
+    "p95_ms": 14.721,
+    "peak_effects": 6,
+    "peak_projectiles": 6,
+    "player_shots": 65,
+    "resolution": "(1280.0, 720.0)",
+    "shield_damage": 360.0
+  },
+  "manual_remaining": [
+    "Long mission pacing and resource balance",
+    "Corner pursuit and encounter avoidance",
+    "Native resolution performance beyond the short 720p combat fixture"
+  ]
+}

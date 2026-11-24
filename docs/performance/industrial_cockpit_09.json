@@ -1,0 +1,120 @@
+{
+  "engine": "Godot 4.7.2",
+  "renderer": "Compatibility",
+  "headless_checks": {
+    "cockpit_smoke": true,
+    "camera_feedback_smoke": true,
+    "heavy_cannon_smoke": true,
+    "combat_smoke": true,
+    "industrial_audio_smoke": true,
+    "lighting_combat_vfx_smoke": true,
+    "proximity_mouse_smoke": true,
+    "signal_lost_smoke": true,
+    "prototype_smoke": true,
+    "collision_geometry_smoke": true,
+    "environment_audio_smoke": true,
+    "dynamic_ai_smoke": true,
+    "drone_model_smoke": true,
+    "parking_audio_smoke": true,
+    "industrial_visuals_smoke": true
+  },
+  "model": {
+    "generator": "tools/blender/generate_industrial_cockpit.py",
+    "triangles": 8440,
+    "rigid_meshes": 7,
+    "textures_px": 512,
+    "forward": "-Z",
+    "components": [
+      "Frame",
+      "LeftHousing",
+      "RightHousing",
+      "LeftBarrel",
+      "RightBarrel",
+      "LeftMount",
+      "RightMount"
+    ],
+    "collision": "none; visual-only cockpit",
+    "muzzles": {
+      "left": [
+        -0.62,
+        -0.3,
+        -1.51
+      ],
+      "right": [
+        0.62,
+        -0.3,
+        -1.51
+      ]
+    }
+  },
+  "combat_720p": {
+    "draw_calls": 279.181948424069,
+    "enemy_damage": [
+      640.0,
+      620.0
+    ],
+    "enemy_shots": [
+      7,
+      7
+    ],
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "health_overrides": "benchmark only; production balance unchanged",
+    "mean_fps": 116.250175707644,
+    "mean_ms": 8.60213753581661,
+    "p95_ms": 12.011,
+    "peak_effects": 5,
+    "peak_projectiles": 4,
+    "player_shots": 65,
+    "resolution": "(1280.0, 720.0)",
+    "shield_damage": 140.0
+  },
+  "traversal_fullscreen": {
+    "enemies_remaining": 2,
+    "shield_damage": 0.0,
+    "static_impacts": 0,
+    "waypoints": [
+      {
+        "error_m": 0.058380126953125,
+        "mean_fps": 53.9657918554827,
+        "physics_steps": 195,
+        "target": "(0.0, 0.0, -44.0)"
+      },
+      {
+        "error_m": 0.0583992674946785,
+        "mean_fps": 56.6677019138308,
+        "physics_steps": 145,
+        "target": "(0.0, 34.0, -44.0)"
+      },
+      {
+        "error_m": 0.0647065937519073,
+        "mean_fps": 51.7281810532317,
+        "physics_steps": 59,
+        "target": "(0.0, 34.0, -52.0)"
+      },
+      {
+        "error_m": 0.060898695141077,
+        "mean_fps": 56.1288026492795,
+        "physics_steps": 106,
+        "target": "(0.0, 44.0, -72.0)"
+      },
+      {
+        "error_m": 0.0105362627655268,
+        "mean_fps": 74.4611318801199,
+        "physics_steps": 59,
+        "target": "(0.0, 44.0, -80.0)"
+      }
+    ]
+  },
+  "display_checks": [
+    "C cockpit preview and classic HUD",
+    "1280x720 composition",
+    "1280x800 low shield / live sonar",
+    "mouse capture",
+    "real cannon audio mix",
+    "sonar mixed audio six distances"
+  ],
+  "manual_remaining": [
+    "Subjective visual finish and recoil comfort",
+    "Extended native-resolution performance across the entire mission"
+  ]
+}

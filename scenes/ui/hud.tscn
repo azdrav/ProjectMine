@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/proximity_indicator.gd" id="2"]
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1")
 [node name="Status" type="Label" parent="."]
@@ -26,7 +27,18 @@ theme_override_colors/font_color = Color(0.4, 1, 0.8, 1)
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = -62.0
+offset_top = -76.0
 offset_bottom = -18.0
-text = "WASD move  •  Space / Ctrl rise / descend  •  Arrows aim  •  Q / E roll\nShift boost  •  LMB / Enter fire  •  R reset  |  Follow the cyan passage lights"
-theme_override_font_sizes/font_size = 16
+text = "WASD move  •  Space / Ctrl rise / descend  •  Mouse / Arrows aim  •  Q / E roll\nShift boost  •  LMB / Enter fire  •  L headlights  •  R restart  •  P proximity  •  Esc release mouse / Click recapture\nC cockpit  •  F4 enemy debug  •  F6 camera shake  •  [ / ] shake intensity"
+theme_override_font_sizes/font_size = 14
+
+[node name="ProximityIndicator" type="Control" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -294.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 150.0
+mouse_filter = 2
+script = ExtResource("2")
+sensor_path = NodePath("../../Ship/Proximity")

@@ -1,0 +1,71 @@
+{
+  "engine": "Godot 4.7.2",
+  "renderer": "Compatibility",
+  "headless": {
+    "heavy_cannon_smoke": true,
+    "camera_feedback_smoke": true,
+    "combat_smoke": true,
+    "industrial_audio_smoke": true,
+    "lighting_combat_vfx_smoke": true,
+    "proximity_mouse_smoke": true,
+    "signal_lost_smoke": true,
+    "prototype_smoke": true,
+    "collision_geometry_smoke": true,
+    "environment_audio_smoke": true,
+    "dynamic_ai_smoke": true,
+    "drone_model_smoke": true,
+    "parking_audio_smoke": true,
+    "industrial_visuals_smoke": true
+  },
+  "combat": {
+    "draw_calls": 203.594237695078,
+    "enemy_damage": [
+      660.0,
+      620.0
+    ],
+    "enemy_shots": [
+      7,
+      7
+    ],
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "health_overrides": "benchmark only; production balance unchanged",
+    "mean_fps": 138.772042347963,
+    "mean_ms": 7.20606242496998,
+    "p95_ms": 9.8,
+    "peak_effects": 4,
+    "peak_projectiles": 4,
+    "player_shots": 65,
+    "resolution": "(1280.0, 720.0)",
+    "shield_damage": 140.0
+  },
+  "audio_analysis": {
+    "before": {
+      "duration_s": 0.23002267573696145,
+      "peak": 0.649993896484375,
+      "rms": 0.09810026000005716,
+      "dc": -0.0011298423309807522,
+      "energy_40_200_hz_fraction": 0.9065610414529914,
+      "energy_below_30_hz_fraction": 4.0915669146009995e-05,
+      "energy_above_4000_hz_fraction": 0.00010696714485936343
+    },
+    "cannon": {
+      "duration_s": 0.26,
+      "peak": 0.5999755859375,
+      "rms": 0.1126774673669359,
+      "dc": 5.0303700206043955e-06,
+      "energy_40_200_hz_fraction": 0.9980299388712782,
+      "energy_below_30_hz_fraction": 1.961473236950613e-06,
+      "energy_above_4000_hz_fraction": 2.1782516996226833e-06
+    }
+  },
+  "live_mix": {
+    "shots": 12,
+    "driver": "PulseAudio",
+    "peak": 0.28368866443634,
+    "rms": 0.0595489814379713
+  },
+  "manual_checks_remaining": [
+    "Subjective sound weight and fatigue on headphones/speakers",
+    "Recoil comfort and weapon weight during human play"
+  ]
+}

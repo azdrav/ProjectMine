@@ -1,0 +1,8 @@
+{
+  "sample_rate": 22050,
+  "samples": 293265,
+  "duration_s": 13.3,
+  "peak_linear": 0.29501327872276306,
+  "rms": 0.017432171311625076,
+  "clipped_samples": 0
+}

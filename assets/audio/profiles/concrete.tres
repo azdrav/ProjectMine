@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/audio/acoustic_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+label = "Concrete maintenance"
+room_size = 0.35
+damping = 0.85
+wet = 0.055
+spread = 0.5
+predelay_ms = 14
+predelay_feedback = 0

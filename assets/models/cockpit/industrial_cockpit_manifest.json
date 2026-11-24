@@ -1,0 +1,29 @@
+{
+  "generator": "tools/blender/generate_industrial_cockpit.py",
+  "triangles": 8440,
+  "rigid_meshes": 7,
+  "textures_px": 512,
+  "forward": "-Z",
+  "components": [
+    "Frame",
+    "LeftHousing",
+    "RightHousing",
+    "LeftBarrel",
+    "RightBarrel",
+    "LeftMount",
+    "RightMount"
+  ],
+  "collision": "none; visual-only cockpit",
+  "muzzles": {
+    "left": [
+      -0.62,
+      -0.3,
+      -1.51
+    ],
+    "right": [
+      0.62,
+      -0.3,
+      -1.51
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/audio/acoustic_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+label = "Mining chamber"
+room_size = 0.74
+damping = 0.62
+wet = 0.13
+spread = 0.8
+predelay_ms = 28
+predelay_feedback = 0.04

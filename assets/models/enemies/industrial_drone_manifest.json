@@ -1,0 +1,57 @@
+{
+  "generator": "tools/blender/generate_industrial_drone.py",
+  "blender": "4.0.2",
+  "triangles": 4134,
+  "mesh_components": 5,
+  "dimensions_m": [
+    1.4600000381469727,
+    0.8521895408630371,
+    1.1547487676143646
+  ],
+  "bounds_min_godot": [
+    -0.7300000190734863,
+    -0.3649999797344208,
+    -0.6700000166893005
+  ],
+  "bounds_max_godot": [
+    0.7300000190734863,
+    0.48718956112861633,
+    0.4847487509250641
+  ],
+  "forward": "-Z",
+  "up": "+Y",
+  "origin": [
+    0,
+    0,
+    0
+  ],
+  "pivots": [
+    "Chassis",
+    "PropulsionLeft",
+    "PropulsionRight",
+    "Optics",
+    "Weapon"
+  ],
+  "muzzle_godot": [
+    0.235,
+    -0.18,
+    -0.68
+  ],
+  "textures": [
+    {
+      "name": "albedo",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "name": "roughness_metallic",
+      "size": [
+        512,
+        512
+      ]
+    }
+  ],
+  "collision": "Existing Godot SphereShape3D radius 0.70m remains unchanged."
+}

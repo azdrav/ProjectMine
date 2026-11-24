@@ -16,6 +16,8 @@ func frames(count: int) -> void:
 
 func run() -> void:
 	var level = load("res://scenes/levels/test_mine.tscn").instantiate()
+	level.spawn_encounters = false
+	level.signal_lost = false
 	root.add_child(level)
 	current_scene = level
 	await frames(3)
@@ -90,4 +92,7 @@ func run() -> void:
 	ship.reset_ship()
 	check(ship.position.is_equal_approx(Vector3(0, 0, 5)), "Reset restores launch position")
 	print("Prototype smoke: %s" % ("PASS" if failures == 0 else "%d failure(s)" % failures))
+	level.queue_free()
+	await frames(2)
+	await create_timer(0.1).timeout
 	quit(0 if failures == 0 else 1)

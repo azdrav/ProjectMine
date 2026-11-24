@@ -1,0 +1,21 @@
+{
+  "draw_calls": 108.388235294118,
+  "enemy_damage": [
+    640.0,
+    620.0
+  ],
+  "enemy_shots": [
+    7,
+    7
+  ],
+  "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+  "health_overrides": "benchmark only; production balance unchanged",
+  "mean_fps": 56.444257477453,
+  "mean_ms": 17.716594117647,
+  "p95_ms": 22.743,
+  "peak_effects": 5,
+  "peak_projectiles": 4,
+  "player_shots": 65,
+  "resolution": "(1920.0, 1080.0)",
+  "shield_damage": 140.0
+}

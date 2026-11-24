@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/audio/acoustic_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+label = "Open / exterior"
+room_size = 0.1
+damping = 0.8
+wet = 0
+spread = 0.4
+predelay_ms = 8
+predelay_feedback = 0

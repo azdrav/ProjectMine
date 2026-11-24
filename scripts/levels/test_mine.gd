@@ -1,5 +1,18 @@
 extends Node3D
 ## Fixed primitive layout. Rooms have rectangular apertures, never overlapping caps.
+@export var signal_lost: bool = true
+@export var environmental_audio: bool = true
+const EnvironmentAudio = preload("res://scenes/audio/environment_audio.tscn")
+@export var spawn_encounters: bool = true
+@export var industrial_upgrade: bool = true
+@export var extended_industrial: bool = true
+const IndustrialEnvironment = preload("res://scenes/visuals/industrial_environment.tscn")
+const IndustrialSection = preload("res://scenes/visuals/industrial_section.tscn")
+const DroneScene = preload("res://scenes/enemies/security_drone.tscn")
+const TunnelWall = preload("res://scripts/levels/tunnel_wall.gd")
+
+var decoration_portals: Array[Dictionary] = []
+
 var wall_material: StandardMaterial3D
 var floor_material: StandardMaterial3D
 var trim_material: StandardMaterial3D
@@ -16,6 +29,16 @@ func _ready() -> void:
 	room(Vector3(0, 34, -44), Vector3(16, 12, 16), {"bottom": Vector2(8, 8), "back": Vector2(8, 8.944272)}, "03 / INCLINE • FORWARD")
 	tunnel(Vector3(0, 34, -52), Vector3(0, 44, -72), 8.0)
 	room(Vector3(0, 44, -80), Vector3(20, 16, 16), {"front": Vector2(8, 8.944272)}, "04 / REACTOR • TURN BACK")
+	if industrial_upgrade:
+		add_child(IndustrialSection.instantiate())
+		if extended_industrial: add_child(IndustrialEnvironment.instantiate())
+	if environmental_audio: add_child(EnvironmentAudio.instantiate())
+	if spawn_encounters: _spawn_drones()
+	if signal_lost:
+		var mission := Node3D.new()
+		mission.name = "Mission"
+		mission.set_script(preload("res://scripts/mission/signal_lost.gd"))
+		add_child(mission)
 
 func material(color: Color, glowing: bool = false) -> StandardMaterial3D:
 	var result := StandardMaterial3D.new()
@@ -27,6 +50,8 @@ func material(color: Color, glowing: bool = false) -> StandardMaterial3D:
 
 func box(center: Vector3, size: Vector3, surface: Material, orientation: Basis = Basis.IDENTITY) -> void:
 	var body := StaticBody3D.new()
+	body.collision_layer = 1
+	body.collision_mask = 1
 	body.position = center
 	body.basis = orientation
 	var mesh := MeshInstance3D.new()
@@ -44,6 +69,8 @@ func box(center: Vector3, size: Vector3, surface: Material, orientation: Basis =
 
 # A wall in its own XY plane, optionally cut into four strips around an opening.
 func wall(center: Vector3, width: float, height: float, orientation: Basis, opening: Vector2) -> void:
+	if opening != Vector2.ZERO:
+		decoration_portals.append({"pose":Transform3D(orientation,center),"half":Vector3(opening.x/2+0.15,opening.y/2+0.15,0.7)})
 	if opening == Vector2.ZERO:
 		box(center, Vector3(width, height, 0.4), wall_material, orientation)
 		return
@@ -59,7 +86,7 @@ func room(center: Vector3, size: Vector3, openings: Dictionary, title: String) -
 	wall(center + Vector3(0, 0, size.z / 2), size.x, size.y, Basis.IDENTITY, openings.get("front", Vector2.ZERO))
 	wall(center - Vector3(0, 0, size.z / 2), size.x, size.y, Basis.IDENTITY, openings.get("back", Vector2.ZERO))
 	for sign_value in [-1.0, 1.0]:
-		wall(center + Vector3(sign_value * size.x / 2, 0, 0), size.z, size.y, Basis(Vector3.UP, PI / 2), Vector2.ZERO)
+		wall(center + Vector3(sign_value * size.x / 2, 0, 0), size.z, size.y, Basis(Vector3.UP, PI / 2), openings.get("right" if sign_value > 0 else "left", Vector2.ZERO))
 	wall(center + Vector3(0, size.y / 2, 0), size.x, size.z, Basis(Vector3.RIGHT, PI / 2), openings.get("top", Vector2.ZERO))
 	wall(center - Vector3(0, size.y / 2, 0), size.x, size.z, Basis(Vector3.RIGHT, PI / 2), openings.get("bottom", Vector2.ZERO))
 	for x in [-size.x * 0.4, size.x * 0.4]:
@@ -84,9 +111,17 @@ func tunnel(start: Vector3, end: Vector3, width: float) -> void:
 	var frame := Basis.looking_at(direction, up)
 	var center := (start + end) / 2.0
 	var length := start.distance_to(end)
+	var axis_alignment := direction.abs()[direction.abs().max_axis_index()]
 	for sign_value in [-1.0, 1.0]:
-		box(center + frame * Vector3(sign_value * (width / 2 + 0.2), 0, 0), Vector3(0.4, width + 0.8, length + 0.8), wall_material, frame)
-		box(center + frame * Vector3(0, sign_value * (width / 2 + 0.2), 0), Vector3(width, 0.4, length + 0.8), floor_material, frame)
+		if axis_alignment < 0.999:
+			# Cut each tilted slab on the portal plane, not perpendicular to the tunnel.
+			# The 25 cm overlap covers the room wall's 20 cm half-thickness.
+			var side_min := width / 2.0 if sign_value > 0.0 else -width / 2.0 - 0.4
+			add_child(TunnelWall.build(start, end, frame, Vector2(side_min, -width / 2.0 - 0.4), Vector2(side_min + 0.4, width / 2.0 + 0.4), wall_material))
+			add_child(TunnelWall.build(start, end, frame, Vector2(-width / 2.0, side_min), Vector2(width / 2.0, side_min + 0.4), floor_material))
+		else:
+			box(center + frame * Vector3(sign_value * (width / 2 + 0.2), 0, 0), Vector3(0.4, width + 0.8, length + 0.8), wall_material, frame)
+			box(center + frame * Vector3(0, sign_value * (width / 2 + 0.2), 0), Vector3(width, 0.4, length + 0.8), floor_material, frame)
 	for index in range(1, int(length / 4.0)):
 		var marker := start + direction * (index * 4.0)
 		box(marker + frame * Vector3(-width / 2 + 0.08, 0, 0), Vector3(0.08, width - 0.3, 0.1), trim_material, frame)
@@ -117,3 +152,26 @@ func configure_inputs() -> void:
 	var mouse := InputEventMouseButton.new()
 	mouse.button_index = MOUSE_BUTTON_LEFT
 	InputMap.action_add_event("fire", mouse)
+
+func _spawn_drones() -> void:
+	for point in [Vector3(2,1,-44),Vector3(2,35,-44)]:
+		var drone = DroneScene.instantiate()
+		drone.position = point
+		drone.encounter_id = "lower" if point.y < 10 else "upper"
+		drone.rotation.y = PI
+		add_child(drone)
+
+func reset_encounter(clear_destroyed: bool = true) -> void:
+	if clear_destroyed and has_node("Mission"): $Mission.destroyed.clear()
+	for drone in get_tree().get_nodes_in_group("enemies"):
+		drone.get_parent().remove_child(drone)
+		drone.queue_free()
+	for projectile in get_tree().get_nodes_in_group("combat_projectiles"):
+		projectile.queue_free()
+	if spawn_encounters: _spawn_drones()
+
+func enemies_remaining() -> int:
+	var count: int = 0
+	for drone in get_tree().get_nodes_in_group("enemies"):
+		if drone.health > 0.0: count += 1
+	return count

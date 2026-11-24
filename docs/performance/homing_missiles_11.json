@@ -1,0 +1,75 @@
+{
+  "engine": "Godot 4.7.2",
+  "renderer": "Compatibility",
+  "headless_tests": {
+    "missile_smoke": true,
+    "portal_decoration_smoke": true,
+    "deep_mine_smoke": true,
+    "signal_lost_smoke": true,
+    "cockpit_smoke": true,
+    "combat_smoke": true,
+    "camera_feedback_smoke": true,
+    "heavy_cannon_smoke": true,
+    "physical_hit_smoke": true,
+    "prototype_smoke": true,
+    "industrial_audio_smoke": true,
+    "lighting_combat_vfx_smoke": true,
+    "proximity_mouse_smoke": true,
+    "collision_geometry_smoke": true,
+    "environment_audio_smoke": true,
+    "dynamic_ai_smoke": true,
+    "drone_model_smoke": true,
+    "parking_audio_smoke": true,
+    "industrial_visuals_smoke": true
+  },
+  "normal_combat": {
+    "draw_calls": 235.088186356073,
+    "enemy_damage": [
+      780.0,
+      480.0
+    ],
+    "enemy_shots": [
+      7,
+      5
+    ],
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "health_overrides": "benchmark only; production balance unchanged",
+    "mean_fps": 100.127983888891,
+    "mean_ms": 9.98721797004991,
+    "missiles_remaining": 0,
+    "p95_ms": 13.262,
+    "peak_effects": 6,
+    "peak_missiles": 1,
+    "peak_projectiles": 8,
+    "player_shots": 65,
+    "resolution": "(1280.0, 720.0)",
+    "shield_damage": 400.0
+  },
+  "manual_remaining": [
+    "Perceived missile weight and lock readability",
+    "Longer mission balance and native resolution performance"
+  ],
+  "four_missile_stress": {
+    "draw_calls": 292.904580152672,
+    "enemy_damage": [
+      900.0,
+      680.0
+    ],
+    "enemy_shots": [
+      7,
+      7
+    ],
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "health_overrides": "benchmark only; production balance unchanged",
+    "mean_fps": 87.3028064520104,
+    "mean_ms": 11.4543854961832,
+    "missiles_remaining": 0,
+    "p95_ms": 14.596,
+    "peak_effects": 6,
+    "peak_missiles": 4,
+    "peak_projectiles": 7,
+    "player_shots": 65,
+    "resolution": "(1280.0, 720.0)",
+    "shield_damage": 420.0
+  }
+}

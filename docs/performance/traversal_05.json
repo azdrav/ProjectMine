@@ -1,0 +1,37 @@
+{
+  "enemies_remaining": 2,
+  "shield_damage": 10.0,
+  "static_impacts": 0,
+  "waypoints": [
+    {
+      "error_m": 0.058380126953125,
+      "mean_fps": 63.4808870395949,
+      "physics_steps": 195,
+      "target": "(0.0, 0.0, -44.0)"
+    },
+    {
+      "error_m": 0.0583992674946785,
+      "mean_fps": 68.0694536789564,
+      "physics_steps": 145,
+      "target": "(0.0, 34.0, -44.0)"
+    },
+    {
+      "error_m": 0.0647065937519073,
+      "mean_fps": 58.0145296797598,
+      "physics_steps": 59,
+      "target": "(0.0, 34.0, -52.0)"
+    },
+    {
+      "error_m": 0.060898695141077,
+      "mean_fps": 70.7312752787427,
+      "physics_steps": 106,
+      "target": "(0.0, 44.0, -72.0)"
+    },
+    {
+      "error_m": 0.0105362627655268,
+      "mean_fps": 93.1259108878159,
+      "physics_steps": 59,
+      "target": "(0.0, 44.0, -80.0)"
+    }
+  ]
+}

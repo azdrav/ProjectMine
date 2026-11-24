@@ -1,0 +1,50 @@
+{
+  "baseline": true,
+  "driver": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+  "resolution": "(1920.0, 1080.0)",
+  "views": {
+    "incline": {
+      "draw_calls": 46.0,
+      "fps": 46.836330443266,
+      "mean_ms": 21.3509468085106,
+      "p95_ms": 22.784,
+      "primitives": 1050.0
+    },
+    "launch": {
+      "draw_calls": 140.0,
+      "fps": 84.6216565734601,
+      "mean_ms": 11.8173058823529,
+      "p95_ms": 14.124,
+      "primitives": 14358.6588235294
+    },
+    "lower_chamber": {
+      "draw_calls": 53.0,
+      "fps": 57.6818270420361,
+      "mean_ms": 17.3364827586207,
+      "p95_ms": 20.804,
+      "primitives": 4992.0
+    },
+    "reactor": {
+      "draw_calls": 33.0,
+      "fps": 85.739865248835,
+      "mean_ms": 11.6631860465116,
+      "p95_ms": 15.294,
+      "primitives": 894.0
+    },
+    "upper_chamber": {
+      "draw_calls": 72.0,
+      "fps": 45.9516588548846,
+      "mean_ms": 21.762,
+      "p95_ms": 23.623,
+      "primitives": 5352.0
+    },
+    "vertical": {
+      "draw_calls": 70.0,
+      "fps": 40.4043427186137,
+      "mean_ms": 24.7498148148148,
+      "p95_ms": 28.603,
+      "primitives": 4864.0
+    }
+  },
+  "vsync": "disabled"
+}

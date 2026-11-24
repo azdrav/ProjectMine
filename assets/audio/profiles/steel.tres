@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/audio/acoustic_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+label = "Steel tunnel"
+room_size = 0.3
+damping = 0.3
+wet = 0.07
+spread = 0.55
+predelay_ms = 12
+predelay_feedback = 0.02
