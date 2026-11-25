@@ -15,6 +15,11 @@ var _help_text := ""
 @onready var status: Label = $Status
 
 func _ready() -> void:
+	var bracket:=Control.new()
+	bracket.name="TargetBracket"
+	bracket.set_script(preload("res://scripts/ui/target_bracket.gd"))
+	bracket.ship=ship
+	add_child(bracket)
 	dashboard = Control.new()
 	dashboard.name = "CockpitDashboard"
 	dashboard.set_script(preload("res://scripts/ui/cockpit_dashboard.gd"))

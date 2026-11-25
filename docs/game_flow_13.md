@@ -93,3 +93,40 @@ Focused ordinary Linux/Windows browsers still need the manual checks below.
 
 No completed human run, Windows performance or subjective audio approval is
 claimed by these automated tests.
+
+## Refined departure shot
+
+The ending now uses `scripts/flow/cinematic_models.gd` to build a deterministic,
+cratered asteroid with a real opening, an octagonal armored tunnel sleeve and
+reinforced illuminated portal. The departing mining skiff has chamfered armor,
+a glazed cabin, twin cooling-ring cannons, hydraulic braces, vented engine pods,
+hazard markings and animated orange exhaust. Rock color/grain uses a small
+256-pixel procedural texture and vertex colors; no external asset download is
+required. These objects have no gameplay collision bodies.
+
+`escape_cinematic.gd` gives this isolated stage its own camera environment and
+warm/cool lighting. It retains the three-second departure, two existing explosion
+cues and GameFlow's completion callback; the real player never moves during it.
+The escape tunnel in the playable level is unchanged. One bounded orthogonal
+sun shadow is used only in this shot, keeping it suitable for Compatibility and
+UHD 620; the fill and rim lights do not cast shadows.
+
+Validate construction with:
+
+```sh
+godot --headless --path . --script res://tests/cinematic_preview.gd
+godot --path . --rendering-method gl_compatibility --script res://tests/cinematic_preview.gd
+```
+
+The rendered fixture saves three frames to `docs/previews/cinematic_refined_*.png`
+and a short isolated-shot report to `docs/performance/cinematic_refined.json`.
+The integration checks remain `game_flow_smoke.gd` and `escape_protocol_smoke.gd`;
+the fixture also checks that translated visual ship assemblies remain attached
+and no collision body is introduced.
+
+The refined shot passed headless construction, GameFlow and Escape Protocol
+integration tests, and another actual-flight evacuation traversal with zero
+failures. Its isolated 1280×720 Compatibility capture on UHD 620 measured about
+130 mean FPS / 9.7 ms p95 (short sample, not a gameplay or Web performance
+guarantee). The Web pack was rebuilt and HTTPS delivery verified; subjective
+ending appearance and browser frame pacing still need a normal play session.

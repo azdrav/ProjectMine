@@ -1298,3 +1298,26 @@ longer mixed-combat performance in native and Web builds. The runtime escape
 fixture starts at the terminal and is not a human completion-time measurement.
 See [the 1.3 play and validation guide](docs/game_flow_13.md) for route details,
 reports and remaining manual checks.
+
+The final departure shot has a cratered, textured asteroid, a reinforced hollow
+industrial tunnel mouth and a detailed two-cannon mining skiff with visible
+engine pods and exhaust. These are isolated visual models, without changes to
+the escape route, player physics or ending timing. Authoring and preview commands
+are documented in [the 1.3 guide](docs/game_flow_13.md#refined-departure-shot).
+
+### Cannon contact bracket
+
+An actual primary-cannon shot activates a restrained cyan sensor box around the
+single visible hostile closest to the **cannon crosshair**, independently of the
+offset missile-lock label. The frame follows projected model bounds for Security,
+Scout and Heavy variants and briefly turns amber on hit confirmation. It fades
+0.85 seconds after the last shot, drops destroyed/occluded targets and resets on
+restart/load. Walls and closed doors block acquisition; this is a visual readout,
+with no auto-aim, damage changes or missile-lock changes. It works with cockpit
+on or off. `scripts/ui/target_bracket.gd` exposes range (70 m), aim cone (12°),
+linger and scan interval (0.10 s). Only acquisition/bounds run at the scan rate;
+projection follows the rendered camera each frame, including rolled attitudes.
+
+Validate with `godot --headless --path . --script res://tests/target_bracket_smoke.gd`.
+Running that fixture without `--headless` also saves a preview to
+`docs/previews/cannon_target_bracket.png`.

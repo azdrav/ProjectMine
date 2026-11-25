@@ -1,0 +1,8 @@
+{
+  "draw_calls": 385.379518072289,
+  "fixture": "Isolated ending shot, not gameplay benchmark",
+  "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+  "mean_fps": 129.747242400356,
+  "p95_ms": 9.66066666666672,
+  "resolution": "1280x720"
+}
