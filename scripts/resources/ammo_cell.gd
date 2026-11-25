@@ -2,31 +2,18 @@ extends Node3D
 var pickup_id := ""
 var amount := 25
 var resource_kind := "ammo"
+var salvage_direction := Vector3.ZERO
 var collected := false
 var _time := 0.0
-var visual: MeshInstance3D
+var visual: Node3D
 func _ready() -> void:
-	visual = MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(0.5,0.35,0.7)
-	visual.mesh = box
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.85,0.35,0.08) if resource_kind == "missiles" else Color(0.12,0.65,0.35)
-	mat.emission_enabled = true
-	mat.emission = Color(0.9,0.25,0.02) if resource_kind == "missiles" else Color(0.10,0.8,0.3)
-	visual.material_override = mat
+	var path := "res://assets/models/pickups/"+("missiles" if resource_kind == "missiles" else "ammo")+".tscn"
+	visual = load(path).instantiate()
 	add_child(visual)
-	var label := Label3D.new()
-	label.text = ("MISSILES / +%d" if resource_kind == "missiles" else "CANNON AMMUNITION / +%d") % amount
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position.y = 0.7
-	label.font_size = 24
-	label.pixel_size = 0.008
-	add_child(label)
 func _process(delta: float) -> void:
 	_time += delta
-	visual.rotation.y += delta*0.6
-	visual.position.y = sin(_time*1.7)*0.12
+	visual.rotation.y += delta*0.18
+	visual.position = salvage_direction*0.07*sin(clampf(_time/0.8,0,1)*PI)+Vector3.UP*sin(_time*1.4)*0.035
 	var ship = get_tree().get_first_node_in_group("player")
 	if not collected and is_instance_valid(ship) and ship.shield > 0 and ship.position.distance_to(global_position)<1.8 and (ship.missiles < ship.max_missiles if resource_kind == "missiles" else ship.ammo < ship.max_ammo):
 		if ship.global_position.distance_to(global_position) > 0.01:

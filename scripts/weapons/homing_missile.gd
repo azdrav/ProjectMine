@@ -74,7 +74,7 @@ func _physics_process(delta: float) -> void:
 		var point := cast.get_collision_point(0)
 		var destroyed := false
 		if is_instance_valid(victim) and victim.is_in_group("enemies"):
-			victim.take_damage(damage,shooter)
+			victim.take_damage(damage,shooter if is_instance_valid(shooter) else null,direction)
 			destroyed = victim.health <= 0
 			if is_instance_valid(shooter): shooter.hit_confirmed.emit()
 		if not destroyed: Effects.destruction(get_tree().current_scene,point)

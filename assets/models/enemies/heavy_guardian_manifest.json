@@ -1,0 +1,38 @@
+{
+  "generator": "tools/blender/generate_enemy_variants.py",
+  "triangles": 3078,
+  "mesh_components": 5,
+  "pivots": [
+    "Chassis",
+    "PropulsionLeft",
+    "PropulsionRight",
+    "Weapon",
+    "Optics"
+  ],
+  "muzzle_godot": [
+    0.33440000000000003,
+    -0.044000000000000004,
+    -0.5104
+  ],
+  "optical_axis_godot": [
+    0.0,
+    0.3784,
+    -0.22
+  ],
+  "runtime_scale": [
+    1.8,
+    1.8,
+    1.8
+  ],
+  "vertex_radius_m": 1.1813285336677586,
+  "bounds_min_godot": [
+    -0.536359965801239,
+    -0.35199999809265137,
+    -0.4954400062561035
+  ],
+  "bounds_max_godot": [
+    0.536359965801239,
+    0.48399999737739563,
+    0.2727999985218048
+  ]
+}

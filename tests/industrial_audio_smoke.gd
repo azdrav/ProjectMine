@@ -94,7 +94,7 @@ func run() -> void:
 	ship.take_damage(25)
 	check(audio.shield.volume_db>quiet and ship.shield==65,"Damage intensity scales audio without changing shield math")
 	ship.fire()
-	check(audio.weapon.stream==Sounds.sound("player_fire") and audio.weapon.max_polyphony==2,"Player fire uses cached bounded-polyphony weapon channel")
+	check(audio.weapon.stream==Sounds.player_cannon() and audio.weapon.max_polyphony==3,"Player fire uses cached bounded-polyphony weapon channel")
 	ship.reset_ship()
 	check(audio.scrape_gain==0 and not audio.scrape.playing,"Reset clears contact audio")
 	print("Industrial audio: ","PASS" if failures==0 else "%d failures"%failures)

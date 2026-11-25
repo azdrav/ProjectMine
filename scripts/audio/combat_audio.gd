@@ -23,7 +23,11 @@ static func sound(kind: String) -> AudioStreamWAV:
 		phase += TAU * frequency / 22050.0
 		var sample := sin(phase) * 0.12
 		if kind == "engine": sample = sin(TAU*80*time)*0.06 + sin(TAU*160*time)*0.025
-		elif kind in ["hit", "destroy"]: sample += random.randf_range(-0.15, 0.15)
+		elif kind == "destroy":
+			sample = sin(TAU*(65*time+18*(1-exp(-time*35))/35))*.32*exp(-time*7)
+			sample += random.randf_range(-0.22,0.22)*exp(-time*26)
+			sample += (sin(TAU*173*time)+sin(TAU*311*time)*.4)*.07*exp(-time*12)
+		elif kind == "hit": sample += random.randf_range(-0.15, 0.15)
 		if kind != "engine": sample *= minf(time / 0.006, 1.0) * pow(1.0-progress, 1.5)
 		data.encode_s16(index*2, roundi(clampf(sample,-0.8,0.8)*32767.0))
 	var result := AudioStreamWAV.new()

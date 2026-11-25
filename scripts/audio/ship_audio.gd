@@ -44,7 +44,7 @@ var _probe := KinematicCollision3D.new()
 
 func _ready() -> void:
 	emergency=_channel("EmergencyEmitter","enemy_fire",1)
-	weapon=_channel("PlayerWeapon","player_fire",2)
+	weapon=_channel("PlayerWeapon","player_fire",3)
 	shield=_channel("ShieldImpact","shield",1)
 	impact=_channel("HullImpact","impact",1)
 	scrape=_channel("HullScrape","scrape",1)
@@ -56,7 +56,7 @@ func _ready() -> void:
 func _channel(title: String, kind: String, voices: int) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.name=title
-	player.stream=Sounds.sound(kind)
+	player.stream=Sounds.player_cannon() if kind == "player_fire" else Sounds.sound(kind)
 	player.bus=Sounds.ensure_bus()
 	player.max_polyphony=voices
 	player.volume_db=-80.0

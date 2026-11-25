@@ -9,7 +9,7 @@ func check(ok: bool, message: String) -> void:
 func frames(count: int) -> void:
 	for i in range(count): await physics_frame
 func run() -> void:
-	var cannon: AudioStreamWAV = Sounds.sound("player_fire")
+	var cannon: AudioStreamWAV = Sounds.player_cannon()
 	var hash := HashingContext.new()
 	hash.start(HashingContext.HASH_SHA256)
 	hash.update(Sounds.sound("enemy_fire").data)
@@ -22,8 +22,8 @@ func run() -> void:
 		mean += value
 	mean /= cannon.data.size()/2
 	check(peak <= 0.601 and absf(mean) < 0.005,"Cannon PCM has headroom and negligible DC")
-	check(cannon.get_length() >= 0.20 and cannon.get_length() <= 0.28,"Short cannon sound fits bounded two-voice rapid fire")
-	check(cannon == Sounds.sound("player_fire"),"Layered sound generated once and cached")
+	check(cannon.get_length() >= 0.20 and cannon.get_length() <= 0.4,"Short cannon sound fits bounded three-voice rapid fire")
+	check(cannon == Sounds.player_cannon(),"Recorded cannon loaded once and cached")
 	cannon.save_to_wav("/tmp/projectmine081-cannon.wav")
 	var level = load("res://scenes/levels/test_mine.tscn").instantiate()
 	level.spawn_encounters = false
@@ -89,7 +89,7 @@ func run() -> void:
 			weapons._process(1.0/120)
 			check(camera.position.length() <= camera.maximum_displacement and weapons._cockpit_offset.length() <= weapons.maximum_cockpit_displacement,"Sustained fire has bounded camera and cockpit motion")
 			check(weapons.rotation.length() <= deg_to_rad(0.25)+0.00001,"Sustained fire never accumulates rotation")
-	check(camera.channels.size() == 1 and audio.weapon.max_polyphony == 2,"Bounded impulse channel and two sound voices during sustained fire")
+	check(camera.channels.size() == 1 and audio.weapon.max_polyphony == 3,"Bounded impulse channel and three sound voices during sustained fire")
 	check(ship.laser_damage == 20 and ship.laser_speed == 100 and ship.laser_interval == 0.14,"Weapon balance preserved")
 	settings.intensity = 0
 	check(camera.position == Vector3.ZERO and weapons._cockpit_offset == Vector3.ZERO and weapons.rotation == Vector3.ZERO,"Comfort disable clears all mechanical view motion")

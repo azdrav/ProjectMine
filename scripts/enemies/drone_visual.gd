@@ -76,3 +76,16 @@ func _process(delta: float) -> void:
 			material.emission_energy_multiplier = emitter.energy*(3.0 if _hit_time>0 else 2.5 if actor.state in [actor.State.ALERT,actor.State.APPROACH,actor.State.ATTACK] else 1.0)
 		else:
 			material.emission_energy_multiplier = emitter.energy*(1.0+sin(_time*4.0)*0.06)
+
+	if actor.state == actor.State.DESTROYED:
+		for emitter in _emitters:
+			emitter.material.emission_energy_multiplier = emitter.energy*(3.0 if int(_time*55)%2 == 0 else 0.03)
+
+	if actor.get("variant") != null and actor.state != actor.State.DESTROYED:
+		for emitter in _emitters:
+			# Variant tint must not overwrite the brief damage flash above.
+			if emitter.optic and _hit_time <= 0.0:
+				var color := Color(1,0.48,0.03) if actor.variant == 1 else Color(1,0.04,0.01)
+				emitter.material.emission = color
+				emitter.material.albedo_color = color
+				if actor.get("charging") == true: emitter.material.emission_energy_multiplier = emitter.energy*(2.0+sin(_time*24)*0.9)

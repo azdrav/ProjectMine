@@ -10,13 +10,16 @@ var traveled: float = 0.0
 var visible_trail_length: float = 0.0
 @export var trail_seconds: float = 0.020
 @export var maximum_trail: float = 2.0
+@export_range(1.0,4.0) var enemy_visual_scale: float = 2.0
+var _visual_scale: float = 1.0
 func _ready() -> void:
 	add_to_group("combat_projectiles")
 	$Beam.mesh=VFX.streak()
 	$Beam.material_override=VFX.material(team,false)
 	$Beam.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	$Beam.visible=false
-	_head=VFX.flash(team,.14)
+	_visual_scale = enemy_visual_scale if team == "enemy" else 1.0
+	_head=VFX.flash(team,.14*_visual_scale)
 	_head.name="EnergyHead"
 	_head.visible=false
 	add_child(_head)
@@ -39,8 +42,9 @@ func _physics_process(delta: float) -> void:
 		var target: Node = hit.collider
 		var hostile := target.is_in_group("player") if team == "enemy" else target.is_in_group("enemies")
 		if hostile and target.has_method("take_damage"):
-			if team == "enemy": target.take_damage(damage,shooter,launch_velocity.normalized())
-			else: target.take_damage(damage,shooter)
+			# A fired projectile can outlive its owner (destruction or encounter reset).
+			var source: Node3D = shooter if is_instance_valid(shooter) else null
+			target.take_damage(damage,source,launch_velocity.normalized())
 			if team == "player" and is_instance_valid(shooter) and shooter.has_signal("hit_confirmed"):
 				shooter.hit_confirmed.emit()
 		impact(hit.position, hit.normal,"electrical" if hostile and team=="player" else ("shield" if hostile else "wall"))
@@ -57,7 +61,7 @@ func _physics_process(delta: float) -> void:
 	var visual_head := global_position
 	if use_visual_muzzle:
 		visual_head = visual_muzzle.lerp(global_position,smoothstep(0.0,0.065,age+delta))
-	visible_trail_length=minf(traveled,minf(maximum_trail,launch_velocity.length()*trail_seconds))
+	visible_trail_length=minf(traveled,minf(maximum_trail*_visual_scale,launch_velocity.length()*trail_seconds*_visual_scale))
 	var bridge_clear := true
 	if launch_velocity.length_squared()>0.001:
 		# The inherited ship velocity can skew the sweep away from camera -Z.
@@ -71,7 +75,7 @@ func _physics_process(delta: float) -> void:
 				bridge_clear = get_world_3d().direct_space_state.intersect_ray(visual_query).is_empty()
 		_previous_visual = visual_head
 		var up := Vector3.FORWARD if absf(axis.dot(Vector3.UP))>.98 else Vector3.UP
-		$Beam.global_basis=Basis.looking_at(axis,up) * Basis.from_scale(Vector3(.12,.12,visible_trail_length))
+		$Beam.global_basis=Basis.looking_at(axis,up) * Basis.from_scale(Vector3(.12*_visual_scale,.12*_visual_scale,visible_trail_length))
 		$Beam.global_position=visual_head
 		$Beam.visible=bridge_clear and (not use_visual_muzzle or traveled >= visual_muzzle.distance_to(_launch_origin))
 		_head.global_position = visual_head

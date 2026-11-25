@@ -91,3 +91,9 @@ static func sound(kind: String) -> AudioStreamWAV:
 		stream.loop_end=count
 	_cache[kind]=stream
 	return stream
+
+static func player_cannon() -> AudioStreamWAV:
+	# Recorded single-shot derivative; kept separate from the Guardian's procedural cannon.
+	if not _cache.has("recorded_cannon"):
+		_cache["recorded_cannon"] = load("res://assets/audio/player_cannon.wav")
+	return _cache["recorded_cannon"]

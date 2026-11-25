@@ -13,6 +13,12 @@ enum State { PATROL, ALERT, APPROACH, ATTACK, SEARCH, RETURN_TO_PATROL, DESTROYE
 @export var acceleration: float = 5.0
 @export var turn_speed: float = 3.0
 @export var aggression: float = 2.0
+@export var evasion_strength: float = 1.0
+@export var maneuver_min: float = 0.9
+@export var maneuver_max: float = 2.0
+@export var weapon_enabled: bool = true
+@export var territory_radius: float = 0.0
+@export var retreat_only: bool = false
 @export_range(0.0,1.0) var dodge_frequency: float = 0.35
 @export var minimum_distance: float = 5.0
 @export var avoidance_distance: float = 2.4
@@ -23,6 +29,7 @@ var _maneuver := Vector3.ZERO
 var _pause: float = 0.0
 var _dodge: float = 0.0
 var _threat_time: float = 0.0
+var alarm_awake_until: int = 0
 @export_group("Detection")
 @export var detection_range: float = 60.0
 @export_range(1.0,360.0) var field_of_view: float = 140.0
@@ -35,9 +42,14 @@ var _threat_time: float = 0.0
 @export var fire_interval: float = 1.25
 @export var projectile_speed: float = 32.0
 @export var projectile_damage: float = 10.0
+@export_group("Destruction")
+@export var wreckage_lifetime: float = 45.0
+@export var maximum_wreckage_groups: int = 4
+@export_range(0,5) var debris_quality: int = 5
 @export_group("Diagnostics")
 @export var debug_visible: bool = false
 var state: State = State.PATROL
+var _death_velocity := Vector3.ZERO
 var health: float
 var sees_player: bool = false
 var last_known_position := Vector3.ZERO
@@ -90,7 +102,7 @@ func _physics_process(delta: float) -> void:
 	_maneuver_time -= delta
 	_dodge = maxf(0.0,_dodge-delta)
 	if _maneuver_time <= 0.0:
-		_maneuver_time = _rng.randf_range(0.9,2.0)
+		_maneuver_time = _rng.randf_range(maneuver_min,maneuver_max)
 		_maneuver = Vector3(_rng.randf_range(0.65,1.0)*(-1.0 if _rng.randf()<0.5 else 1.0),_rng.randf_range(-0.6,0.6),0)
 	var target := global_position
 	var combat_motion := Vector3.ZERO
@@ -120,6 +132,7 @@ func _physics_process(delta: float) -> void:
 				var toward := (_player.global_position-global_position).normalized()
 				var radial := clampf((distance-standoff_distance)*0.4,-1.0,1.0)
 				if distance < minimum_distance: radial = -1.0
+				if retreat_only: radial = minf(radial,-0.35)
 				var side := toward.cross(Vector3.UP)
 				if side.length_squared() < 0.01: side = Vector3.RIGHT
 				side = side.normalized()
@@ -127,11 +140,11 @@ func _physics_process(delta: float) -> void:
 				var lateral := (side*_maneuver.x + up*_maneuver.y)*sin(_state_time*1.7)
 				# Probe both directions: evasion contracts before entering a narrow passage.
 				var clearance := minf(probe(side),probe(-side))
-				lateral *= clampf((clearance-0.9)/maxf(0.1,avoidance_distance-0.9),0.0,1.0)
+				lateral *= evasion_strength*clampf((clearance-0.9)/maxf(0.1,avoidance_distance-0.9),0.0,1.0)
 				combat_motion = (toward*radial + lateral*(1.5 if _dodge>0 else 0.9))*move_speed*aggression
 				if _dodge > 0.0: combat_motion -= toward*move_speed*0.5
 				var aim := (_player.global_position-global_position).normalized()
-				if distance <= attack_range and -global_basis.z.dot(aim) > 0.96 and _fire_time <= 0.0 and has_line_of_sight(): fire()
+				if weapon_enabled and distance <= attack_range and -global_basis.z.dot(aim) > 0.96 and _fire_time <= 0.0 and has_line_of_sight(): fire()
 		State.SEARCH:
 			face(last_known_position,delta)
 			target = last_known_position
@@ -145,6 +158,8 @@ func _physics_process(delta: float) -> void:
 			if global_position.distance_to(_home) < 0.7: change_state(State.PATROL)
 	var desired := (target-global_position).normalized()*move_speed if global_position.distance_to(target)>0.25 else Vector3.ZERO
 	if state in [State.APPROACH,State.ATTACK]: desired = combat_motion
+	if territory_radius > 0 and global_position.distance_to(_home) > territory_radius:
+		desired = (_home-global_position).normalized()*move_speed*aggression
 	desired = avoid_obstacles(desired)
 	velocity = velocity.move_toward(desired,acceleration*delta)
 	move_and_slide()
@@ -202,7 +217,7 @@ func fire() -> void:
 	_fire_time = maxf(fire_interval,0.1)
 	shots_fired += 1
 	weapon_audio.play()
-func take_damage(amount: float, source: Node = null) -> void:
+func take_damage(amount: float, source: Node = null, _incoming_direction: Vector3 = Vector3.ZERO) -> void:
 	if state == State.DESTROYED: return
 	health = maxf(0.0,health-maxf(0.0,amount))
 	if _rng.randf() < dodge_frequency: _dodge = 0.8
@@ -219,12 +234,13 @@ func take_damage(amount: float, source: Node = null) -> void:
 		collision_mask = 0
 		$CollisionShape3D.set_deferred("disabled",true)
 		engine_audio.stop()
-		Effects.destruction(get_tree().current_scene,global_position)
 		set_physics_process(false)
-		var tween := create_tween().set_parallel(true)
-		tween.tween_property(visual,"scale",Vector3.ZERO,0.45)
-		tween.tween_property(visual,"rotation:z",2.0,0.45)
-		tween.chain().tween_callback(queue_free)
+		_death_velocity = velocity
+		velocity = Vector3.ZERO
+		# Short electrical failure, then break the actual imported rigid assemblies apart.
+		var sequence := create_tween()
+		sequence.tween_interval(0.14)
+		sequence.tween_callback(_break_apart)
 	elif is_instance_valid(source) and source.is_in_group("player"):
 		_threat_time = 2.5
 		_sense_time = 0.0
@@ -238,3 +254,20 @@ func _exit_tree() -> void:
 		if is_instance_valid(audio):
 			audio.stop()
 			audio.stream = null
+
+func _break_apart() -> void:
+	var group := Node3D.new()
+	group.set_script(preload("res://scripts/effects/drone_wreckage.gd"))
+	group.lifetime = wreckage_lifetime
+	group.maximum_groups = maximum_wreckage_groups
+	group.quality = debris_quality
+	get_tree().current_scene.add_child(group)
+	group.build(visual.model,global_position,_death_velocity)
+	Effects.destruction(get_tree().current_scene,global_position)
+	var player = get_tree().get_first_node_in_group("player")
+	if is_instance_valid(player):
+		var offset: Vector3 = player.global_position-global_position
+		var strength := clampf(1.0-offset.length()/18.0,0,1)
+		player.get_node("Camera3D/VisualOffset").add_impulse("drone_explosion",0.012*strength,0.22,offset,true)
+	visual.visible = false
+	queue_free()

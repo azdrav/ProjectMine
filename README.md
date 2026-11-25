@@ -1,4 +1,4 @@
-# ProjectMine 1.1 — Ammunition & Homing Missiles
+# ProjectMine 1.2 — Enemy Variety
 
 A self-contained Godot 4 / GDScript first-person 6DoF spaceship combat prototype. All runtime assets are included; no external art downloads or plugins are required. Blender is needed only to regenerate the authored drone model.
 
@@ -888,3 +888,296 @@ missiles** and measured **87.3 mean FPS / 14.6 ms p95**. This is not a whole-mis
 native-resolution guarantee. Details: `docs/performance/homing_missiles_11.json`;
 preview: `docs/previews/homing_missiles_11.png`. Human playtesting remains necessary
 for perceived lock feedback, missile evasion and longer-term resource balance.
+
+
+## ProjectMine 1.1.1 — Industrial resource props
+
+Cannon packs now show three exposed cartridges in reinforced steel with hazard
+paint and an amber indicator. Missile packs have two longer finned miniature
+missiles and red identification. There are no floating gameplay labels. Slow
+rotation, 3.5 cm bobbing and softly pulsing material emission aid visibility;
+there are no dynamic lights, particles or added physics bodies.
+
+Reusable cyan power cells and green cross-marked shield modules are included as
+visual-only prefabs. Neither is added to the drop table: energy already regenerates
+and adding shield supplies would alter encounter balance. Cannon/missile quantities,
+capacity checks, automatic proximity/line-of-sight collection, notification,
+probabilities and persistent pickup IDs remain unchanged. The models fit within
+the existing 0.6 m spawn-clearance sphere, including bobbing.
+
+Assets/prefabs: `assets/models/pickups/{ammo,missiles,energy,shield}.{glb,tscn}`.
+Editable Blender files: `assets/models/pickups/source/*.blend`. Regenerate with
+`blender --background --python-exit-code 1 --python tools/blender/generate_resource_pickups.py`.
+The generator reuses the industrial cockpit atlas and modelling conventions.
+`pickup_visual.gd` only loads/articulates visuals; `ammo_cell.gd` retains resource
+collection. Existing saves therefore load the new art without migration.
+
+Validation: resource-model budget/bounds/no-label/no-light checks, deep-mine
+collection and save persistence, missile/ammo capacity/migration tests, and combat
+regressions passed. The four props were inspected with the Compatibility renderer.
+Human gameplay checking remains useful for spotting small pickups in very dark
+corridors. Preview: `docs/previews/industrial_pickups_111.png`.
+
+
+## ProjectMine 1.1.2 — Mechanical destruction and salvage
+
+A lethal hit immediately disables AI, targeting and the drone hull. A 140 ms
+sensor/propulsion electrical flicker precedes separation; the intact model is
+removed without shrinking. Five actual imported mesh assemblies become wreckage:
+armoured chassis, left/right propulsion, weapon and optical module. Geometry and
+materials are reused, with dead emitters dimmed. The burst adds a brief orange-
+white emissive flash, six small sparks and three short transparent vapor puffs,
+without explosion lights. Nearby ships receive distance-scaled visual feedback.
+The deeper mechanical/electrical explosion uses a quiet shared reverb send into
+the existing IndustrialFX limiter; living enemy weapons remain unchanged.
+
+Drone Inspector destruction settings: `wreckage_lifetime` defaults to 45 seconds,
+`maximum_wreckage_groups` to four, and `debris_quality` from zero to five larger
+parts. `drone_wreckage.gd` exposes these settings too. Large pieces use zero-gravity
+RigidBody3D, simplified box hulls, continuous collision, outward impulses, retained
+partial motion, randomized angular velocity and damping. They collide only with
+level geometry: layer zero / mask one excludes player, sonar, projectiles and
+other debris. A part initially overlapping a wall is frozen rather than allowed
+to explode out of penetration. After six seconds bodies freeze to save physics
+work; wreckage stays visible. Old/expired groups freeze and fade over 1.5 seconds;
+fading groups can briefly coexist with four active groups. Reset/load clears
+cosmetic wreckage; destroyed-enemy and pickup persistence remain authoritative.
+
+Drop chances, resource amounts, capacity and collection remain unchanged. Dropped
+packs get a tiny 0.8-second visual outward bob within their checked spawn volume;
+the persistent collection anchor stays unchanged, avoiding save migration or
+pickup motion through walls. Wreckage never damages or blocks navigation.
+
+Validation: all 21 headless smoke suites passed, including `wreckage_smoke.gd`,
+which covers immediate shutdown, non-shrinking removal, component count, wall-only
+masks, attack-state destruction next to a corridor wall, burst limits and fading.
+Existing mission, ammunition, save/load and combat regressions also passed.
+`wreckage_runtime.gd` exercises six rapid destructions with four retained groups
+and 20 bodies. A short 1280×720 Compatibility sample on Intel UHD 620 measured
+117.9 mean FPS / 11.56 ms p95; it is not a whole-mission performance guarantee.
+Human playtesting is still needed for perceived explosion weight, audio mix and
+near-player fade comfort. Results: `docs/performance/drone_wreckage_112.json`.
+
+Rapid effect cleanup also uses weak references for deferred acoustic registration, avoiding stale audio-node callbacks when multiple explosions retire together. Compatibility fades use material alpha rather than renderer-specific instance transparency.
+
+
+## ProjectMine 1.2 — Guardian and Scout variants
+
+Two authored scenes use `enemy_variant.gd`, a thin extension of the existing
+Security Drone FSM; sensing, collision/avoidance, projectiles, hit reactions,
+destruction, salvage and persistent IDs remain shared. Standard Security Drones
+retain their original health, damage, cadence and movement defaults. The expanded
+mine still contains ten enemies: `deep_3` becomes a Heavy Guardian in excavation,
+and `deep_4` becomes a Scout alongside the transport Security Drone. Existing
+routes and mission progression do not require clearing either encounter.
+
+**Heavy Guardian:** approximately 1.8× standard visual size, 1.26 m spherical
+hull, reinforced hazard-marked shoulders, enlarged cannon and propulsion, red
+sensor. Defaults: 210 HP, 0.8 m/s patrol, acceleration 3.5, low lateral evasion
+(0.16 multiplier), 15 m preferred firing distance. A 7 m home territory keeps it
+in the large excavation chamber. Its glowing cannon chamber, pulsing optic and
+mechanical charge announce a 0.95 s wind-up. Lost sight/range cancels the charge;
+22-damage projectiles travel at 24 m/s with 3.2 s post-shot cadence.
+Its firing range is 60 m, matching detection: the 7 m chamber leash must not
+leave a visible player permanently beyond the cannon range. Its deep
+weapon/engine pitches use shared cached sounds without modifying player audio.
+The forward 55° half-cone takes 35% damage; side/rear/top/bottom hits take full
+damage. Armour uses actual incoming projectile/missile direction, falling back
+to attacker position only for direct scripted damage.
+
+**Scout Drone:** 25 HP, small flattened hull (0.58 m collision radius), wider
+light propulsion, no visible weapon, amber sensor and quiet high-pitched engine.
+It patrols at 3 m/s with frequent maneuver changes and retreats rather than
+closing during combat. Continuous detection must last 1.3 s before the alarm;
+evading detection or destroying the Scout cancels the unfinished warning. Alarm
+cooldown is 10 s. Only living standard Security Drones within 28 m and a clear
+wall-only ray receive its last-known player location. They search and must obtain
+their own player sight before shooting. Nearby sleeping responders can wake for
+five seconds; mission-gated guards cannot wake early. This is local line-of-sight
+communication, not a map-wide alert or enemy wave system.
+
+Variant Inspector profiles expose health, patrol speed, acceleration, evasion,
+preferred distance, model scale and hull radius. Ability settings expose charge
+time, front armour multiplier/cone, alarm delay/radius/cooldown. Base exports
+still expose weapons, territory, maneuver timing and per-scene ammo-drop chances
+and amounts; default drops remain 70% / 15–35 units. Set these on
+`scenes/enemies/heavy_guardian.tscn` or `scout_drone.tscn`. Leaving the active area
+cancels incomplete charging/alarm progress. Homing locks use the common hostile
+group and work on both types. Wreckage bakes imported visual scales into mesh and
+simple hull sizes, avoiding scaled rigid bodies; hidden Scout weapons are omitted.
+
+Stable encounter IDs and the existing save schema are unchanged. Loading old
+saves preserves destroyed IDs; surviving fixed encounters use the new variants.
+Player controls/inertia, cockpit, sonar, energy, primary/missile balance,
+environmental audio and level collision geometry are unchanged.
+
+`tests/enemy_variants_smoke.gd` covers profiles, armour directions, charged shot
+and cancellation, Scout retreat/delay/cooldown/escape, local wall-blocked relay,
+homing eligibility, destruction and save persistence. The existing regression
+suite remains applicable. `tests/enemy_variants_preview.gd` provides a display
+comparison (Scout / Security / Guardian). Human playtesting is still needed to
+evaluate telegraph readability, optional Guardian difficulty and alarm fairness.
+
+1.2 validation: **22 headless smoke suites passed**, including variant-specific
+behaviour/destruction/save checks and the existing mission, 3D navigation,
+collision, weapons, pickups, audio and cockpit regressions. The variants were
+reviewed together using the Compatibility renderer. A short mixed-enemy combat
+fixture with guided missiles on Intel UHD 620 at 1280×720 measured **92.3 mean FPS
+/ 13.6 ms p95**; the fixture overrides two standard enemies' health and holds the
+player still, so it is not a whole-mission native-resolution guarantee. Results:
+`docs/performance/enemy_variety_12.json`; preview:
+`docs/previews/enemy_variety_12.png`.
+
+### Recorded player cannon sound
+
+Player cannon shots now use `assets/audio/player_cannon.wav`, prepared from the
+user-edited `assets/audio/gun.mp3` (0.313 s). The original MP3 is untouched.
+The cached mono PCM derivative retains timing/pitch, attenuates peaks to 0.60 and
+uses a 2 ms edge fade. Rebuild after editing the MP3 with
+`python tools/audio/prepare_player_cannon.py` (numpy and libsndfile required only
+for authoring, not to play the game).
+
+The real `weapon_fired` signal still synchronizes sound, alternating muzzle flash
+and recoil. Cadence remains 0.14 s; three bounded audio voices accommodate the
+recording's tails. It is not a repeating loop. Enemy/Guardian weapon recipes and
+environmental acoustic routing remain unchanged. The recorded sample is selected
+by `IndustrialSounds.player_cannon()`; `sound("player_fire")` retains the original
+procedural recipe for the Guardian.
+
+### Reference-based enemy models
+
+Guardian and Scout now have separate GLBs rather than scaled Security Drone
+geometry. The existing Security Drone remains unchanged. The Guardian takes the
+reference's armored torso, broad shoulders, red visor and dominant arm cannon,
+with twin propulsion pods replacing legs to retain the existing 3D flight AI.
+The Scout uses a low elongated body, swept motor supports and an amber sensor
+cluster. Neither replacement changes encounter placement, hull radius, health,
+weapon balance, AI or saved encounter IDs.
+
+`assets/models/enemies/maintenance_bot.tscn` is a reusable **visual-only** service
+robot: yellow equipment enclosure, jointed tool arms, gripper, probe and flexible
+feeds. It is not placed in the mission and has no hostile group, AI or resource
+behavior. Its future service role can be added independently.
+
+Regenerate all three assets using:
+
+```sh
+blender --background --python-exit-code 1 --python tools/blender/generate_enemy_variants.py
+```
+
+The standalone script reuses the packed industrial atlas from the original
+`assets/models/enemies/source/industrial_drone.blend`; regenerate that source
+with the original drone generator first if it is absent. Each new model has an
+editable `source/<name>.blend`, an optimized GLB and a JSON manifest. Guardian:
+3,078 triangles; Scout: 2,608; Maintenance: 2,128. Each has five joined mechanical
+components, two embedded 512px maps and restrained optical/exhaust emission, with
+no imported lights or extra gameplay colliders. The Guardian and Scout remain
+inside their existing 1.26m and 0.58m collision spheres, including visual animation
+clearance. The shared model node names preserve propulsion animation, muzzle
+flash, recoil and variant-specific wreckage. The Guardian's charge glow is
+attached to its new cannon muzzle; redundant runtime plates and scaling patches
+were removed.
+
+`tests/enemy_models_smoke.gd` checks imported geometry, triangle budgets, hull
+clearance, muzzle attachments, isolated visual recoil, unscaled debris physics
+and the service prefab's lack of gameplay behavior. `tests/enemy_models_preview.gd`
+produces `docs/previews/enemy_models_reference.png` using a preview-only studio;
+`tests/enemy_variants_preview.gd` displays hostile variants in the existing level.
+Manual gameplay is still needed to judge silhouette recognition in dark tunnels
+and the subjective visibility of Guardian charging during evasive flight.
+
+Reference-model validation: **9 headless suites passed** (`enemy_models`,
+`drone_model`, `enemy_variants`, `wreckage`, `missile`, `dynamic_ai`, `signal_lost`,
+`resource_models`, `deep_mine`). Import and the additional embedded-texture
+regression check pass after a clean reimport. Compatibility previews were
+inspected in the studio and the existing level. A short 1280×720 mixed-combat
+fixture on Intel UHD 620 measured **65.3 mean FPS / 23.2 ms p95**, recorded in
+`docs/performance/enemy_models_reference.json`; this is a short local fixture,
+not a guarantee across the mission. No gameplay tuning was changed for that run;
+health overrides are confined to the existing benchmark fixture.
+
+
+### Guardian encounter regression checks
+
+`tests/guardian_live_smoke.gd` runs the actual fresh Deep Mine level and its
+activation loop. A real primary projectile hits the Guardian from the entrance;
+the test waits for live retaliation, checks the chamber leash, moves the player
+inside and waits for another charged shot. It also checks that the variant sensor
+tint preserves the short damage flash, and that a projectile whose shooter was
+freed still applies damage once and is removed safely. Damage, charge duration,
+cadence, movement speed and hull armor are unchanged. Standard drone ranges are
+unchanged. Laser and missile hit resolution now pass a null source if their owner
+has been freed, avoiding invalid-object errors during combat/destruction.
+
+For a suspected inactive enemy, **F4** toggles the existing enemy diagnostic labels
+(state, health, line of sight and distance). These are hidden during normal play.
+The reported complete nonreaction inside the chamber has not yet been reproduced;
+the regression covers both entrance and in-chamber combat under live AI updates.
+
+
+Enemy projectile visibility: `scripts/weapons/laser.gd` exposes
+`enemy_visual_scale` (default **2.0**). Enemy energy heads and trail width/target
+length are doubled; trails still cannot extend behind their launch point. Player
+projectile visuals, collision rays, trajectories, speed, damage and firing cadence
+are unchanged. The effect uses the same shared meshes/materials and adds no lights.
+
+Explosion visibility uses a 0.72 m hot white core (0.12 s), a soft additive amber
+halo that fades over 0.24 s, slightly larger glowing fragments and three warm
+flame/vapor puffs fading into smoke. Overall cleanup remains 0.8 s and the six
+active explosion limit is unchanged. This adds one lightweight billboard per
+explosion, no dynamic lights or extra particle systems. Energy shader brightness
+defaults to 1.0, so projectile and other shared energy effects keep their existing
+appearance. Destruction audio, damage, shake and wreckage physics are unchanged.
+
+## Browser trial (Linux and Windows)
+
+A local **Web Trial** release export is configured in `export_presets.cfg`:
+Compatibility/WebGL 2, single-threaded WebAssembly, no extension support/PWA or
+cross-origin-isolation requirement. Web audio explicitly uses **Stream** to
+retain the existing audio bus effects. The browser-only `WebTrial` autoload
+pauses at a click-to-start screen, requests mouse capture/fullscreen from that
+interaction, and adds **Z descend**, **J save**, **K load** to avoid browser
+Ctrl+W and F5 shortcuts. Native controls, physics, AI and combat tuning are
+unchanged. Web saves use browser storage, separate from native `user://` saves.
+
+Build with matching Godot export templates installed:
+
+```sh
+python3 tools/web/build.py
+python3 tools/web/serve.py
+```
+
+The output is `build/web/index.html` plus its companion files, and the portable
+`dist/ProjectMine-web-trial.zip` (about 13 MB). On Linux run `play-linux.sh` from
+the extracted ZIP; on Windows run `play-windows.bat`. Both launch a Python 3
+stdlib server and open `http://localhost:8060/`. Python 3 is required on the
+machine serving the trial; Godot is not required to play. Keep all exported
+files together and use HTTP, not a `file://` double-click. The server is local
+only and no public deployment has been performed. Generated build/archive
+folders are ignored by Git. The original recorded-source `gun.mp3`, tests,
+tools, docs and Blender source files are excluded from the game package.
+
+See [trial instructions and validation](docs/web_trial.md), also supplied as
+`PLAY_WEB.txt` in the ZIP. Linux Chromium smoke testing verified loading,
+keyboard flight, cannon ammunition and J/K save restoration across reopening.
+Five native headless regressions passed. Mouse capture raised an `UnknownError`
+in the embedded Chromium test; neither pointer lock nor fullscreen was confirmed,
+so those require testing in normal Chrome/Firefox. Windows execution, subjective
+audio/reverb quality and the complete browser mission remain manual checks.
+
+LAN serving can be enabled explicitly with `python3 tools/web/serve.py --host
+0.0.0.0 --no-open`; the default remains loopback-only. Plain HTTP asset serving
+was verified at `http://10.7.7.239:8060/`. The exported Godot loader requires a
+secure context even without threads, so direct remote HTTP does **not** make the
+game playable: use trusted HTTPS or a localhost SSH tunnel. `--host` does not
+change browser restrictions or configure firewall/router rules.
+
+The local trial server also supports HTTPS: generate a LAN certificate with
+`python3 tools/web/create_lan_certificate.py --ip 10.7.7.239`, then run
+`python3 tools/web/serve.py --https --host 0.0.0.0 --no-open`. The active LAN
+server was switched to HTTPS on port 8060 and its TLS chain/hostname/WASM serving
+were verified. Import the public `dist/ProjectMine-local-CA.crt` on the client
+before opening `https://10.7.7.239:8060/`; see `docs/web_trial.md` for Windows and
+Firefox steps. No trust store is modified automatically. Private keys stay
+outside the website/export/ZIP under `~/.local/share/projectmine-web/certs/`.
+Defaults remain local HTTP; `--cert`/`--key` can supply an existing PEM identity.

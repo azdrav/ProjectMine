@@ -3,6 +3,7 @@ render_mode unshaded, blend_add, depth_draw_never, cull_disabled, fog_disabled;
 uniform vec4 energy_color : source_color = vec4(0.1,0.65,1.0,1.0);
 uniform vec4 core_color : source_color = vec4(0.85,0.96,1.0,1.0);
 uniform bool billboard = false;
+uniform float brightness = 1.0;
 void vertex() {
 	// Writing POSITION anywhere disables Godot's implicit transform for all paths.
 	POSITION = PROJECTION_MATRIX*MODELVIEW_MATRIX*vec4(VERTEX,1.0);
@@ -26,6 +27,6 @@ void fragment() {
 		core = pow(edge,16.0)*(1.0-smoothstep(0.0,0.3,UV.y));
 		opacity = (pow(edge,2.0)*0.32+core)*tail;
 	}
-	ALBEDO = mix(energy_color.rgb,core_color.rgb,core*0.8)*COLOR.rgb;
+	ALBEDO = mix(energy_color.rgb,core_color.rgb,core*0.8)*COLOR.rgb*brightness;
 	ALPHA = opacity*COLOR.a;
 }

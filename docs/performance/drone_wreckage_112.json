@@ -1,0 +1,38 @@
+{
+  "headless": {
+    "proximity_mouse_smoke": true,
+    "industrial_visuals_smoke": true,
+    "parking_audio_smoke": true,
+    "wreckage_smoke": true,
+    "environment_audio_smoke": true,
+    "physical_hit_smoke": true,
+    "drone_model_smoke": true,
+    "resource_models_smoke": true,
+    "signal_lost_smoke": true,
+    "missile_smoke": true,
+    "industrial_audio_smoke": true,
+    "lighting_combat_vfx_smoke": true,
+    "heavy_cannon_smoke": true,
+    "collision_geometry_smoke": true,
+    "camera_feedback_smoke": true,
+    "prototype_smoke": true,
+    "combat_smoke": true,
+    "cockpit_smoke": true,
+    "dynamic_ai_smoke": true,
+    "portal_decoration_smoke": true,
+    "deep_mine_smoke": true
+  },
+  "runtime": {
+    "bodies": 20,
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+    "groups": 4,
+    "mean_fps": 117.928122809148,
+    "p95_ms": 11.562,
+    "resolution": "(1280, 720)"
+  },
+  "notes": [
+    "Six rapid destructions; up to four active wreckage groups, 20 rigid bodies",
+    "Cosmetic wreckage is not saved and is cleared on load/reset",
+    "Subjective sound/visual comfort and long mission performance require manual gameplay"
+  ]
+}

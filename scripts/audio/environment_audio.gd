@@ -173,11 +173,12 @@ func _route_player(player: Node, bus: StringName) -> Dictionary:
 	return {"player":player,"original_bus":original}
 
 func _candidate_added(node: Node) -> void:
-	if node is AudioStreamPlayer3D: call_deferred("_register_candidate",node)
+	if node is AudioStreamPlayer3D: call_deferred("_register_candidate",weakref(node))
 
-func _register_candidate(node: Node) -> void:
+func _register_candidate(reference: WeakRef) -> void:
+	var node: Node = reference.get_ref()
 	if not is_instance_valid(node) or not node.is_inside_tree(): return
-	var owner := node.get_parent()
+	var owner: Node = node.get_parent()
 	if not owner is Node3D or (not owner.is_in_group("enemies") and not str(owner.name).begins_with("DroneDestruction")): return
 	var players: Array = []
 	for child in owner.get_children():

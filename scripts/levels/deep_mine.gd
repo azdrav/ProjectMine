@@ -3,7 +3,7 @@ const Cell = preload("res://scripts/resources/ammo_cell.gd")
 var collected: Dictionary = {}
 var pickups: Dictionary = {}
 var _activation_clock := 0.0
-const ENCOUNTERS := [Vector3(2,1,-44),Vector3(2,35,-44),Vector3(55,0,-3),Vector3(59,2,-6),Vector3(54,0,-44),Vector3(58,2,-44),Vector3(54,34,-44),Vector3(59,35,-44),Vector3(87,34,-44),Vector3(-3,44,-80)]
+const ENCOUNTERS := [Vector3(2,1,-44),Vector3(2,35,-44),Vector3(55,0,-3),Vector3(58,2,2),Vector3(54,0,-44),Vector3(58,2,-44),Vector3(54,34,-44),Vector3(59,35,-44),Vector3(87,34,-44),Vector3(-3,44,-80)]
 func _ready() -> void:
 	configure_inputs()
 	wall_material = material(Color(0.16,0.20,0.23))
@@ -73,7 +73,8 @@ func _ready() -> void:
 	spawn_cell("missile_cache_1",Vector3(86,34,-42),2,"missiles")
 func _spawn_drones() -> void:
 	for i in range(ENCOUNTERS.size()):
-		var drone = DroneScene.instantiate()
+		var template: PackedScene = preload("res://scenes/enemies/heavy_guardian.tscn") if i == 3 else preload("res://scenes/enemies/scout_drone.tscn") if i == 4 else DroneScene
+		var drone = template.instantiate()
 		drone.position = ENCOUNTERS[i]
 		drone.encounter_id = "lower" if i == 0 else "upper" if i == 1 else "deep_"+str(i)
 		drone.rotation.y = PI
@@ -89,9 +90,11 @@ func _physics_process(delta: float) -> void:
 	for drone in get_tree().get_nodes_in_group("enemies"):
 		if drone.health <= 0: continue
 		var event_ready: bool = drone.encounter_id not in ["deep_7","deep_9"] or $Mission.generator_active
-		var active: bool = event_ready and drone.position.distance_to(ship.position)<70
+		drone.set_meta("alarm_enabled",event_ready)
+		var active: bool = event_ready and (drone.position.distance_to(ship.position)<70 or drone.alarm_awake_until > Time.get_ticks_msec())
 		drone.set_physics_process(active)
 		if not active:
+			if drone.has_method("suspend_variant"): drone.suspend_variant()
 			drone.velocity = Vector3.ZERO
 			drone.engine_audio.stop()
 		elif not drone.engine_audio.playing and DisplayServer.get_name() != "headless": drone.engine_audio.play()
@@ -106,6 +109,7 @@ func spawn_cell(id: String, point: Vector3, amount: int, kind: String = "ammo") 
 	cell.pickup_id = id
 	cell.amount = amount
 	cell.resource_kind = kind
+	if id.begins_with("drop_"): cell.salvage_direction = Vector3(randf_range(-1,1),randf_range(-1,1),randf_range(-1,1)).normalized()
 	cell.position = point
 	add_child(cell)
 func drone_destroyed(drone: Node3D) -> void:

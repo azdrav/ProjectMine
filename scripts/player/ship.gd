@@ -55,7 +55,8 @@ var boost_exhausted := false
 func _ready() -> void:
 	ammo = mini(starting_ammo,max_ammo)
 	missiles = mini(starting_missiles,max_missiles)
-	capture_mouse()
+	# Browsers require a click before pointer lock; the web start panel supplies it.
+	if not OS.has_feature("web"): capture_mouse()
 
 func capture_mouse() -> void:
 	_mouse_motion = Vector2.ZERO

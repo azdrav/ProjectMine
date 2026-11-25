@@ -162,6 +162,7 @@ func _spawn_drones() -> void:
 		add_child(drone)
 
 func reset_encounter(clear_destroyed: bool = true) -> void:
+	for wreck in get_tree().get_nodes_in_group("drone_wreckage"): wreck.queue_free()
 	if clear_destroyed and has_node("Mission"): $Mission.destroyed.clear()
 	for drone in get_tree().get_nodes_in_group("enemies"):
 		drone.get_parent().remove_child(drone)

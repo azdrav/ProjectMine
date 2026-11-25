@@ -1,0 +1,59 @@
+PROJECTMINE / WEB TRIAL
+
+This is the same browser build for Linux and Windows. No Godot installation is
+needed to play. A current desktop browser with WebGL 2 and Python 3 are required.
+
+1. Extract the entire ZIP, keeping all files together.
+2. Linux: run `sh play-linux.sh` from the extracted folder.
+   Windows: double-click play-windows.bat (Python 3 must be installed).
+3. Open http://localhost:8060/ in Chrome/Chromium, Edge or Firefox.
+4. Click PLAY IN WINDOW or PLAY FULLSCREEN. Keep the server terminal open.
+   Do not open index.html with a file:// URL.
+
+CONTROLS
+WASD: flight; Space: up; Z: down; Q/E: roll; Shift: boost.
+Mouse: aim; left button: cannons; right button: homing missile; V: emergency gun.
+F: interact; C: cockpit; P: sonar; L: headlights; R: restart encounter.
+J: save; K: load. Esc releases the mouse; click the game to capture it again.
+The native Ctrl-down and F5/F9 keys still exist, but browser shortcuts may
+intercept them. Use Z and J/K for this test, especially instead of Ctrl+W.
+
+SAVES
+Save data belongs to this browser profile and this site/port. It is separate
+from the Linux/Windows native game. Allow site storage, avoid private mode and
+wait a few seconds after saving before closing/reloading the tab. Switching
+browser, hostname or port gives a separate save. Clearing site data deletes it.
+
+CHECKLIST FOR BOTH OPERATING SYSTEMS
+- Mouse capture/release, fullscreen, pitch/yaw/roll, boost and vertical movement.
+- Cannon recoil, missile lock/fire, enemy attacks and destruction.
+- Cockpit toggle, actual ammo/shield/energy, sonar and headlights.
+- Environmental sound/reverb; click the page if sound is initially muted.
+- Mission terminal, generator, powered door and objective progression.
+- J save, move/fire, K load; then reload the page and K load again.
+- Note FPS in the HUD, browser/version, GPU, resolution and any audio delay.
+
+This trial uses single-threaded WebAssembly + Compatibility/WebGL 2 and Stream
+audio to preserve Godot's audio bus effects. Browser speed and audio latency may
+differ from the native game. Linux validation does not validate Windows.
+Loading, keyboard flight, firing and persistent saves passed the Linux browser
+smoke test. Embedded Chromium reported a pointer-lock UnknownError: mouse capture
+and fullscreen still need checking in a regular Chrome/Firefox/Edge browser.
+If startup fails, open browser developer tools (F12), check Console, and keep
+the local server's error output. Use a browser with hardware acceleration.
+
+Stop the server with Ctrl+C. No files are uploaded to an external website.
+To change ports: python3 serve.py --port 8061 (Windows: py -3 serve.py --port 8061).
+
+LAN SERVER OPTION
+python3 serve.py --host 0.0.0.0 --no-open (Windows: py -3 serve.py --host 0.0.0.0)
+This serves the files to your network, but the Godot loader requires a secure
+context. To PLAY from another computer use trusted HTTPS or an SSH tunnel to
+localhost; plain http://<LAN-IP>:8060 will be rejected by the game loader.
+
+HTTPS HOSTING
+On the Linux host, run tools/web/create_lan_certificate.py --ip <LAN-IP> from
+the repository, then serve.py --https --host 0.0.0.0. Import the generated PUBLIC
+ProjectMine-local-CA.crt on client computers before opening https://<LAN-IP>:8060/.
+No trust store is changed automatically; private keys are never in this package.
+Default localhost serving without --https remains HTTP.
