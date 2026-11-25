@@ -1,7 +1,10 @@
 extends Node3D
 ## Mission authority; interaction is proximity + unobstructed sight, never a waypoint arrow.
-const SAVE_PATH := "user://signal_lost_v1.json"
-const OBJECTIVES := ["Enter the mining complex", "Locate maintenance control — lower shaft chamber", "Read the maintenance power report [F]", "Activate auxiliary power — follow POWER markings", "Return to the sealed Sector B door", "Investigate Sector B security control", "Signal Lost complete — security lockdown confirmed"]
+const Slots = preload("res://scripts/flow/save_slots.gd")
+const SAVE_PATH := "user://saves/slot_1.json"
+var elapsed: float = 0.0
+var run_id: String = "%d-%d"%[Time.get_unix_time_from_system(),randi()]
+const OBJECTIVES := ["Enter the mining complex", "Locate maintenance control — lower shaft chamber", "Read the maintenance power report [F]", "Activate auxiliary power — follow POWER markings", "Return to the sealed Sector B door", "Investigate Sector B security control", "ESCAPE PROTOCOL — EVACUATE THE MINE", "Mission Complete — Evacuation confirmed"]
 var objective: int = 0
 var terminal_active := false
 var generator_active := false
@@ -91,7 +94,7 @@ func control(id: String, point: Vector3, title: String) -> void:
 func refresh_terminals() -> void:
 	controls.maintenance.set_status("POWER REPORT\nSECTOR B: ISOLATED\n"+("REPORT ACCESSED" if terminal_active else "AWAITING OPERATOR"),terminal_active)
 	controls.generator.set_status("AUXILIARY SUPPLY\n"+("OUTPUT STABLE\nSECTOR B: ONLINE" if generator_active else "OUTPUT: OFFLINE\n"+("READY TO START" if terminal_active else "MAINTENANCE LOCK")),generator_active)
-	controls.security.set_status("SECURITY CONTROL\n"+("LOG RECOVERED\nLOCKDOWN CONFIRMED" if security_active else "COMMUNICATIONS LOST\nACCESS LOG [F]"),security_active)
+	controls.security.set_status("SECURITY CONTROL\n"+("STRUCTURAL FAILURE\nEVACUATE / E-04" if security_active else "COMMUNICATIONS LOST\nACCESS LOG [F]"),security_active)
 
 func _on_door_opened() -> void:
 	door_open = true
@@ -107,7 +110,7 @@ func accessible(id: String) -> bool:
 	return hit.is_empty() or hit.collider == target
 
 func interact(id: String) -> void:
-	if not accessible(id) or ship.shield <= 0: return
+	if not accessible(id) or ship.shield <= 0 or security_active: return
 	match id:
 		"maintenance":
 			if objective < 2: return
@@ -126,11 +129,17 @@ func interact(id: String) -> void:
 				apply_power()
 		"security":
 			if not door_open: return
+			if security_active: return
+			get_node("/root/GameFlow").checkpoint("Security control")
 			security_active = true
 			objective = 6
-			message = "Security log: communications isolated by automated lockdown. Mission complete."
+			var escape := get_parent().get_node_or_null("EscapeProtocol")
+			if escape: escape.begin()
+			else: message = "Security log: communications isolated by automated lockdown."
+
 
 	refresh_terminals()
+	if id in ["maintenance","generator"]: get_node("/root/GameFlow").checkpoint(id.capitalize())
 
 func apply_power() -> void:
 	door.powered = generator_active
@@ -141,6 +150,7 @@ func apply_power() -> void:
 	power_light.light_energy = 2.0 if generator_active else 0.6
 
 func _physics_process(_delta: float) -> void:
+	if objective<7 and ship.shield>0: elapsed+=_delta
 	if objective == 0 and ship.position.z < -16: objective = 1
 	if objective == 1 and accessible("maintenance"): objective = 2
 	if generator_active and not door_open and not door.opening and ship.position.distance_to(door.position) < 8:
@@ -148,8 +158,9 @@ func _physics_process(_delta: float) -> void:
 		message = "Sector B interlock released. Stand clear — door opening."
 		$DoorSign.text = "SECTOR B / OPENING"
 	prompt = ""
-	for id in controls:
-		if accessible(id): prompt = "[F] " + str(id).to_upper()
+	if not security_active:
+		for id in controls:
+			if accessible(id): prompt = "[F] " + str(id).to_upper()
 	hud.text = "SIGNAL LOST / " + OBJECTIVES[objective] + "\n" + message + "\n" + prompt
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -160,18 +171,34 @@ func _unhandled_key_input(event: InputEvent) -> void:
 				if accessible(id):
 					interact(id)
 					break
-		KEY_F5: save_game()
-		KEY_F9: load_game()
+		KEY_F5:
+			if get_node("/root/GameFlow").session_active: get_node("/root/GameFlow").quick_save()
+			else: save_game()
+		KEY_F9:
+			if get_node("/root/GameFlow").session_active: get_node("/root/GameFlow").quick_load()
+			else: load_game()
 
 func save_game(path: String = SAVE_PATH) -> bool:
+	if ship.shield<=0:
+		message="Cannot save a disabled ship."
+		return false
 	# A save taken while moving restores the door fully open, never around the ship.
 	var saved_door: bool = door_open or door.opening
 	var saved_objective: int = maxi(objective,5) if door.opening else objective
 	var data := {"version":3,"position":[ship.position.x,ship.position.y,ship.position.z],"basis":[],"shield":ship.shield,"energy":ship.energy,"objective":saved_objective,"terminal":terminal_active,"generator":generator_active,"door":saved_door,"security":security_active,"destroyed":destroyed}
+	var escape := get_parent().get_node_or_null("EscapeProtocol")
+	if escape:
+		if escape.phase==escape.Phase.FAILED: return false
+		data.version=4
+		data["escape"]=escape.export_state()
+		data["elapsed"]=elapsed
+		data["run_id"]=run_id
+	data["saved_at"]=Time.get_unix_time_from_system()
 	data["ammo"] = ship.ammo
 	data["missiles"] = ship.missiles
 	if get_parent().has_method("save_expansion"): data["expansion"] = get_parent().save_expansion()
 	for axis in [ship.basis.x,ship.basis.y,ship.basis.z]: data.basis.append_array([axis.x,axis.y,axis.z])
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var file := FileAccess.open(path+".tmp",FileAccess.WRITE)
 	if file == null:
 		message = "Save failed: cannot write file."
@@ -185,6 +212,7 @@ func save_game(path: String = SAVE_PATH) -> bool:
 		return false
 	var error := DirAccess.rename_absolute(path+".tmp",path)
 	message = "Saved." if error == OK else "Save failed: cannot replace file."
+	if error==OK and escape and escape.phase==1: message+=" "+escape.navigation_hint()
 	return error == OK
 
 func valid_numbers(value: Variant, count: int) -> bool:
@@ -194,6 +222,7 @@ func valid_numbers(value: Variant, count: int) -> bool:
 	return true
 
 func load_game(path: String = SAVE_PATH) -> bool:
+	if path==SAVE_PATH and not FileAccess.file_exists(path) and FileAccess.file_exists(Slots.legacy_path): path=Slots.legacy_path
 	var file := FileAccess.open(path,FileAccess.READ)
 	if file == null:
 		message = "No readable save found."
@@ -230,28 +259,22 @@ func load_game(path: String = SAVE_PATH) -> bool:
 		if destroyed.has(drone.encounter_id):
 			drone.get_parent().remove_child(drone)
 			drone.queue_free()
-	message = "Loaded."
+	elapsed=float(data.get("elapsed",0))
+	run_id=str(data.get("run_id","legacy-"+str(FileAccess.get_modified_time(path))))
+	var escape := get_parent().get_node_or_null("EscapeProtocol")
+	if escape:
+		if data.version==4: escape.restore(data.escape)
+		elif security_active:
+			escape.restore({"phase":0,"remaining":escape.evacuation_duration,"duration":escape.evacuation_duration,"stage":0,"zones":[]})
+			escape.begin()
+		else: escape.restore({"phase":0,"remaining":escape.evacuation_duration,"duration":escape.evacuation_duration,"stage":0,"zones":[]})
+	message = "Loaded."+(" "+escape.navigation_hint() if escape and escape.phase==1 else "")
 	return true
 
 func validate_save(data: Dictionary) -> bool:
-	if (data.get("version") != 1 and data.get("version") != 2 and data.get("version") != 3) or not valid_numbers(data.get("position"),3) or not valid_numbers(data.get("basis"),9): return false
-	if data.get("version") == 3:
-		if not valid_numbers([data.get("missiles")],1) or data.missiles < 0 or data.missiles > ship.max_missiles or data.missiles != floor(data.missiles): return false
-	if data.get("version") >= 2:
-		if not valid_numbers([data.get("ammo")],1) or data.ammo < 0 or data.ammo > ship.max_ammo or data.ammo != floor(data.ammo): return false
-	if data.has("expansion") and (not get_parent().has_method("valid_expansion") or not get_parent().valid_expansion(data.expansion)): return false
-	for key in ["shield","energy","objective"]:
-		if not valid_numbers([data.get(key)],1): return false
-	if data.objective < 0 or data.objective > 6 or data.objective != floor(data.objective): return false
-	if data.shield < 0 or data.shield > 100 or data.energy < 0 or data.energy > 100: return false
-	for key in ["terminal","generator","door","security"]:
-		if not data.get(key) is bool: return false
-	if not data.get("destroyed") is Dictionary: return false
-	for id in data.destroyed:
-		if data.destroyed[id] != true: return false
-		if id not in ["lower","upper"] and (not get_parent().has_method("valid_enemy_id") or not get_parent().valid_enemy_id(id)): return false
-	if data.terminal != (data.objective >= 3) or data.generator != (data.objective >= 4) or data.door != (data.objective >= 5) or data.security != (data.objective == 6): return false
-	return not (data.generator and not data.terminal or data.door and not data.generator or data.security and not data.door)
+	if not Slots.validate(data): return false
+	if data.get("ammo",0)>ship.max_ammo or data.get("missiles",0)>ship.max_missiles: return false
+	return not data.has("expansion") or (get_parent().has_method("valid_expansion") and get_parent().valid_expansion(data.expansion))
 
 func _exit_tree() -> void:
 	if is_instance_valid(audio):

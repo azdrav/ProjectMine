@@ -7,18 +7,22 @@ needed to play. A current desktop browser with WebGL 2 and Python 3 are required
 2. Linux: run `sh play-linux.sh` from the extracted folder.
    Windows: double-click play-windows.bat (Python 3 must be installed).
 3. Open http://localhost:8060/ in Chrome/Chromium, Edge or Firefox.
-4. Click PLAY IN WINDOW or PLAY FULLSCREEN. Keep the server terminal open.
+4. Choose New Game, Continue or Load Game, then click Enter Cockpit.
+   Fullscreen is available in Options. Keep the server terminal open.
    Do not open index.html with a file:// URL.
 
 CONTROLS
 WASD: flight; Space: up; Z: down; Q/E: roll; Shift: boost.
 Mouse: aim; left button: cannons; right button: homing missile; V: emergency gun.
 F: interact; C: cockpit; P: sonar; L: headlights; R: restart encounter.
-J: save; K: load. Esc releases the mouse; click the game to capture it again.
+J: quick-save slot 1; K: quick-load. Esc or M opens the pause menu.
+Use Save Game / Load Game in the menu for all three slots and the checkpoint.
+Click Resume Game to capture the mouse again.
 The native Ctrl-down and F5/F9 keys still exist, but browser shortcuts may
 intercept them. Use Z and J/K for this test, especially instead of Ctrl+W.
 
 SAVES
+Version 4 saves include evacuation time and progress; older saves remain loadable.
 Save data belongs to this browser profile and this site/port. It is separate
 from the Linux/Windows native game. Allow site storage, avoid private mode and
 wait a few seconds after saving before closing/reloading the tab. Switching

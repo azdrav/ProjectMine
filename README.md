@@ -1,10 +1,10 @@
-# ProjectMine 1.2 — Enemy Variety
+# ProjectMine 1.3 — Game Flow & Escape Protocol
 
-A self-contained Godot 4 / GDScript first-person 6DoF spaceship combat prototype. All runtime assets are included; no external art downloads or plugins are required. Blender is needed only to regenerate the authored drone model.
+A self-contained Godot 4 / GDScript 6DoF exploration game with a complete Signal Lost mission and final evacuation. All runtime assets are included; no external art downloads or plugins are required. Blender is needed only to regenerate the authored drone model.
 
 ## Launch
 
-Open `project.godot` in Godot 4 and press **F6** with the test mine open, or **F5** to run the configured main scene. From this directory:
+Open `project.godot` in Godot 4 and press **F5** to start the main menu. **New Game** enters the full mission. **F6** on an individual test scene is a development fixture and bypasses the application flow. From this directory:
 
 ```sh
 godot --path .
@@ -20,7 +20,7 @@ Tested with Godot 4.7.2. Uses the Compatibility renderer and built-in Godot phys
 | A / D | Strafe left / right |
 | Space / Ctrl | Rise / descend along ship up |
 | Mouse movement | Aim by rotating the ship (yaw / pitch) |
-| Escape / left click | Release cursor / recapture (recapture click does not fire) |
+| Escape / left click | Pause/resume menu / recapture after focus loss (recapture click does not fire) |
 | P | Toggle proximity warning system |
 | L | Toggle both ship headlights |
 | F3 | Toggle collision wireframes (green hull, cyan level) |
@@ -29,16 +29,17 @@ Tested with Godot 4.7.2. Uses the Compatibility renderer and built-in Godot phys
 | F6 | Toggle camera shake (restores last enabled intensity) |
 | [ / ] | Decrease / increase shake intensity by 10 percentage points |
 | F | Interact with nearby mission controls |
-| F5 / F9 | Save / load mission |
+| F5 / F9 | Quick-save slot 1 / quick-load slot 1 (menus offer all slots) |
+| Z / J / K / M (Web) | Descend / quick-save / quick-load / alternate pause |
 | Up / Down arrows | Pitch up / down |
 | Left / Right arrows | Yaw left / right |
 | Q / E | Roll left / right |
 | Shift | Boost while moving; consumes energy |
 | Left mouse / Enter | Fire primary cannons; consumes finite cannon ammo and existing energy cost |
 | Right mouse | Launch homing missile after confirmed lock |
-| R | Restart encounter; restore position, orientation, shield, energy and both drones |
+| R | Developer encounter reset; restore starting ship resources and enemy population |
 
-All movement and rotation follow the ship's current orientation. There is no gravity, automatic leveling or external ship model. Releasing movement smoothly brakes the ship. Energy regenerates whenever boost is inactive. After boost runs out, release Shift to rearm it; the HUD shows a reminder. Speed reports actual travel, including when blocked by a wall. Shield starts at 100%. Enemy lasers deplete it; at zero the ship is disabled until R restarts the encounter.
+All movement and rotation follow the ship's current orientation. The flight controller has no gravity or automatic leveling; the departure shot uses a separate visual ship stand-in. Releasing movement smoothly brakes the ship. Energy regenerates whenever boost is inactive. After boost runs out, release Shift to rearm it; the HUD shows a reminder. Speed reports actual travel, including when blocked by a wall. Shield starts at 100%. Enemy lasers deplete it; at zero the Mission Failed menu offers Retry Checkpoint, Load Game or Main Menu. In normal play, R remains the original developer encounter reset; it is not a substitute for checkpoint retry.
 
 ## Test mine
 
@@ -1181,3 +1182,119 @@ before opening `https://10.7.7.239:8060/`; see `docs/web_trial.md` for Windows a
 Firefox steps. No trust store is modified automatically. Private keys stay
 outside the website/export/ZIP under `~/.local/share/projectmine-web/certs/`.
 Defaults remain local HTTP; `--cert`/`--key` can supply an existing PEM identity.
+
+## ProjectMine 1.3 — Complete game flow and Escape Protocol
+
+The configured entry point is now `scenes/flow/main_menu.tscn`. The main menu
+contains New Game, Continue, Load Game, Options and Quit. Continue only enables
+for a fully validated, living save. New Game creates a fresh facility/mission,
+resources and run ID, preserving manual save slots. Quit on Web explains that the
+browser tab must be closed. The industrial inspection-bay background has no AI.
+
+`GameFlow` (`scripts/flow/game_flow.gd`) is the always-processing UI authority.
+Escape pauses gameplay; Resume, Save, Load, Options and Main Menu remain usable.
+On Web, M is an alternate pause key when the browser consumes Escape for pointer
+lock/fullscreen. All mine nodes, AI, projectiles, countdown, door animation and
+world tweens inherit the paused scene tree. Death cannot Resume; it offers Retry
+Checkpoint, Load Game and Main Menu. The separate three-second departure visual
+runs intentionally while the real ship/world is frozen, then displays completion
+time, persistent enemy kills and remaining shield. It never moves the player body.
+
+Options expose master volume, camera feedback 0–100% and fullscreen. Volume and
+camera comfort persist. Web retains Stream audio and single-threaded export;
+New Game/Continue/Load show a browser-only Enter Cockpit button so mouse capture
+starts from a real click. Flight physics and the original aiming system are
+unchanged. Individual development scenes can still run without the managed flow.
+
+### Saves and checkpoints
+
+Three manual slots are `user://saves/slot_1.json` through `slot_3.json`; the
+single automatic slot is `user://saves/checkpoint.json`. Use the pause menu to
+choose a slot. F5/F9 (J/K on Web) quick-save/load slot 1, falling back to the
+latest valid save if slot 1 is absent. Continue chooses the newest valid manual
+slot/checkpoint/legacy save. A corrupt, unsupported or dead save cannot enable
+Continue or mutate a loaded world. Writes retain the temporary-file/rename path.
+
+Version 4 adds mission elapsed time, run ID, evacuation phase, exact remaining
+time, configured duration, route stage and triggered structural zones. Player
+pose, shield/energy, ammunition, terminals, doors, killed IDs and collected/drop
+resources remain authoritative as before. The emergency doors derive from the
+escape state; no duplicate independent door flag can disagree with it.
+
+Versions 1–3 and the existing `user://signal_lost_v1.json` remain loadable. A
+legacy save after the old final terminal starts a fresh full evacuation. Legacy
+missing ammunition uses the existing starting-resource migration rules. The
+legacy file is not overwritten by New Game or normal slot saves.
+
+Checkpoints occur at arrival, maintenance, generator and **before** the final
+security activation; successful evacuation writes a completed checkpoint for Continue. Retry therefore returns to a safe pre-escape state with the
+full configured evacuation time available after activation. Checkpoints are
+associated with the current run ID; loading another run does not silently retry
+an unrelated checkpoint. Safe loaded states can establish a checkpoint when
+needed; short-time escape snapshots do not replace a safe checkpoint. Repeated
+terminal interaction during evacuation cannot overwrite the recovery point.
+
+### Escape route and world extension
+
+The security terminal now triggers **ESCAPE PROTOCOL — EVACUATE THE MINE** rather
+than ending the mission immediately. Default time is 240 seconds. Red facility
+lighting, a restrained PA alarm and a clear HUD timer announce the failure.
+Security AI/attacks shut down during evacuation; existing bodies remain obstacles
+that sonar can detect and the player can navigate around. Existing combat and
+drops before the terminal are unchanged. No new enemy waves are spawned.
+
+Return down the incline to the upper utility junction, follow AUX east through
+the power gallery and SERVICE cache, pass the unlocked emergency interlock,
+ascend the new E-04 shaft, and cross the enclosed windowed transfer bridge to the
+evacuation gate. Fixed signs and emergency strips guide the route, with no HUD
+waypoint arrow. The bridge has reinforced frames, solid window collisions,
+shared low-cost glass, batched stars and a visible neighboring asteroid/mining
+installation. It demonstrates a multi-asteroid facility without open-space flight.
+Only the service-cache exit and the short final extension change the old layout.
+
+`escape_protocol.gd` owns the ordered route, timer and six predefined failure
+zones. Each zone activates after player progress/time and only behind a player
+who has moved clear. `collapse_zone.gd` animates sacrificial panels, capped shared
+explosion/spark effects and at most six small wall-colliding rigid fragments.
+Debris has collision layer 0, so it cannot damage or block the ship, projectiles
+or navigation. Critical walls/floors never disappear or seal a route. Old wreckage
+and the new structural debris remain separate, bounded systems.
+
+Configure `evacuation_duration` (10–3600 s) and `evacuation_debris_limit` (0–12)
+on the Deep Mine root in the Inspector. Defaults are 240 s and 6 pieces. Route
+positions, zone timing and the six stage volumes are in `escape_protocol.gd`;
+bridge/asteroid authoring is in `escape_transport.gd`. Save/restore clears transient
+escape debris, reconstructs deterministic zone damage and restores remaining
+time exactly. Timeout fails the mission; late gate crossing cannot win afterward.
+
+### Validation
+
+Git checkpoint before changes: `6aa0f33` on `codex/escape-protocol-1.3`.
+
+```sh
+godot --headless --path . --script res://tests/game_flow_smoke.gd
+godot --headless --path . --script res://tests/escape_protocol_smoke.gd
+godot --path . --rendering-method gl_compatibility --script res://tests/escape_route_runtime.gd
+```
+
+The new headless tests cover New Game and Continue availability, independent
+slots/corruption, active AI/projectile/mission/door pausing, death/retry, completion
+UI and return to menu, terminal activation, full player-hull route clearance,
+emergency doors, timer pause/restore, progressive debris, legacy completed-save
+migration, earlier-state rollback, victory and timeout. The runtime pilot uses
+the unchanged forward input, inertia, braking and collision controller, including
+rolled and vertical orientations, to fly the route and capture menu/bridge/ending
+previews. All 26 headless smoke suites passed. Native UHD 620 / Compatibility
+fixtures at 1280×720 measured about 88.6 mean FPS (18.0 ms p95) during evacuation
+and 91.2 FPS (17.6 ms p95) in the short mixed combat/missile fixture. These are
+local samples, not minimum-FPS guarantees. Browser menus, save/load and Continue
+persistence after reload also passed; embedded Chromium mouse capture reported
+an UnknownError and needs checking in a focused ordinary browser.
+
+Manual testing is still required for mouse-driven high-speed turns, readable
+emergency cues and alarm mix, repeated death/load decisions, different browser
+fullscreen/pointer-lock behavior, the full exploration-to-escape campaign, and
+longer mixed-combat performance in native and Web builds. The runtime escape
+fixture starts at the terminal and is not a human completion-time measurement.
+See [the 1.3 play and validation guide](docs/game_flow_13.md) for route details,
+reports and remaining manual checks.

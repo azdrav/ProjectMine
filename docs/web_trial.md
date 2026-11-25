@@ -28,16 +28,26 @@ Ctrl+C. Paket ništa ne otprema na javni sajt i server sluša samo lokalni raču
 
 ## Kontrole za browser
 
-- Po učitavanju izabrati PLAY IN WINDOW ili PLAY FULLSCREEN.
+- Po učitavanju izabrati New Game, Continue ili Load Game, zatim Enter Cockpit.
+  Fullscreen je dostupan u Options.
 - **Z** spušta brod, Space podiže. Ctrl ostaje dostupan, ali Ctrl+W je browser
   prečica koja može zatvoriti tab; zato u web verziji koristiti Z.
 - **J** snima, **K** učitava. F5/F9 su zadržani, ali J/K izbegavaju prečice browsera.
-- Esc oslobađa miš, klik na igru ponovo traži hvatanje kursora.
+- Esc otvara pauzu; **M** je alternativna pauza ako browser presretne Esc.
+  Resume Game ponovo traži hvatanje kursora.
 - Ostalo: WASD, Q/E, Shift, levi/desni klik, V, F, C, P i L kao na desktopu.
 
 Snimak pripada browser profilu i adresi/portu. Nije zajednički sa desktop
 verzijom niti drugim browserom. Dozvoliti skladištenje podataka sajta, izbegavati
 privatni režim i sačekati nekoliko sekundi posle snimanja pre zatvaranja taba.
+
+Verzija 1.3 dodaje tri ručna slota i automatski checkpoint, menije za smrt i
+završetak misije i četvorominutni Escape Protocol. U lokalnom ugrađenom browseru
+provereni su New Game, pauza, snimanje/učitavanje i opstanak slota/checkpointa
+posle osvežavanja; Continue se pravilno aktivira. Taj Chromium prijavljuje
+UnknownError pri hvatanju miša. Pun prolaz, hvatanje miša, fullscreen i zvuk
+još treba ručno proveriti u običnim Linux/Windows browserima. Detalji su u
+[vodiču za 1.3](game_flow_13.md).
 
 ## Ponovni izvoz
 

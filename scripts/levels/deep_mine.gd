@@ -3,6 +3,8 @@ const Cell = preload("res://scripts/resources/ammo_cell.gd")
 var collected: Dictionary = {}
 var pickups: Dictionary = {}
 var _activation_clock := 0.0
+@export_range(10,3600) var evacuation_duration: float = 240.0
+@export_range(0,12) var evacuation_debris_limit: int = 6
 const ENCOUNTERS := [Vector3(2,1,-44),Vector3(2,35,-44),Vector3(55,0,-3),Vector3(58,2,2),Vector3(54,0,-44),Vector3(58,2,-44),Vector3(54,34,-44),Vector3(59,35,-44),Vector3(87,34,-44),Vector3(-3,44,-80)]
 func _ready() -> void:
 	configure_inputs()
@@ -25,7 +27,7 @@ func _ready() -> void:
 	room(Vector3(56,34,-44),Vector3(16,12,16),{"bottom":Vector2(8,8),"left":Vector2(8,8),"right":Vector2(8,8)},"AUX POWER / SECTOR B ←  •  SERVICE CACHE →")
 	tunnel(Vector3(8,34,-44),Vector3(48,34,-44),8)
 	tunnel(Vector3(64,34,-44),Vector3(80,34,-44),8)
-	room(Vector3(88,34,-44),Vector3(16,12,16),{"left":Vector2(8,8)},"SERVICE / RESERVE CELLS")
+	room(Vector3(88,34,-44),Vector3(16,12,16),{"left":Vector2(8,8),"right":Vector2(8,8)},"SERVICE / RESERVE CELLS")
 	# Landmarks leave the central flight paths unobstructed.
 	for x in [48.0,64.0]: box(Vector3(x,-6,0),Vector3(2,10,2),material(Color(0.32,0.24,0.10)))
 	if industrial_upgrade:
@@ -71,6 +73,13 @@ func _ready() -> void:
 	for i in range(3): spawn_cell("cache_"+str(i),[Vector3(50,0,6),Vector3(88,34,-42),Vector3(-5,0,-42)][i],30)
 	spawn_cell("missile_cache_0",Vector3(50,0,5),2,"missiles")
 	spawn_cell("missile_cache_1",Vector3(86,34,-42),2,"missiles")
+	var escape := Node3D.new()
+	escape.name="EscapeProtocol"
+	escape.set_script(preload("res://scripts/flow/escape_protocol.gd"))
+	escape.evacuation_duration=evacuation_duration
+	escape.maximum_debris=evacuation_debris_limit
+	add_child(escape)
+
 func _spawn_drones() -> void:
 	for i in range(ENCOUNTERS.size()):
 		var template: PackedScene = preload("res://scenes/enemies/heavy_guardian.tscn") if i == 3 else preload("res://scenes/enemies/scout_drone.tscn") if i == 4 else DroneScene
@@ -89,6 +98,12 @@ func _physics_process(delta: float) -> void:
 	var ship = $Ship
 	for drone in get_tree().get_nodes_in_group("enemies"):
 		if drone.health <= 0: continue
+		if has_node("EscapeProtocol") and $EscapeProtocol.phase!=0:
+			drone.set_physics_process(false)
+			drone.velocity=Vector3.ZERO
+			drone.engine_audio.stop()
+			if drone.has_method("suspend_variant"): drone.suspend_variant()
+			continue
 		var event_ready: bool = drone.encounter_id not in ["deep_7","deep_9"] or $Mission.generator_active
 		drone.set_meta("alarm_enabled",event_ready)
 		var active: bool = event_ready and (drone.position.distance_to(ship.position)<70 or drone.alarm_awake_until > Time.get_ticks_msec())

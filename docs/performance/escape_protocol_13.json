@@ -1,0 +1,11 @@
+{
+  "draw_calls": 274.02808988764,
+  "failures": 0,
+  "fixture": "Autopilot uses unchanged forward input, inertia, braking and collision body, with rolled orientations. AI suspended for escape; manual mouse/combat testing still required.",
+  "gpu": "Mesa Intel(R) UHD Graphics 620 (WHL GT2)",
+  "mean_fps": 88.5941947829867,
+  "p95_ms": 17.9778888888888,
+  "peak_escape_bodies": 6,
+  "peak_explosions": 1,
+  "resolution": "(1280, 720)"
+}

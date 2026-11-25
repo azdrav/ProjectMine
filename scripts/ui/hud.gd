@@ -79,7 +79,7 @@ func _process(delta: float) -> void:
 	if cockpit != _cockpit_layout:
 		_cockpit_layout = cockpit
 		apply_cockpit_layout(cockpit)
-	status.text = "PROJECTMINE 1.2   /   SIGNAL LOST\n\nSPEED   %05.1f m/s%s" % [ship.get_real_velocity().length(), "  BOOST" if ship.boosting else ""]
+	status.text = "PROJECTMINE 1.3   /   SIGNAL LOST\n\nSPEED   %05.1f m/s%s" % [ship.get_real_velocity().length(), "  BOOST" if ship.boosting else ""]
 	if not cockpit: status.text += "\nAMMO %03d/%03d%s  /  MISSILES %02d/%02d" % [ship.ammo,ship.max_ammo," LOW" if ship.ammo <= ship.low_ammo_threshold else "",ship.missiles,ship.max_missiles]
 	if not cockpit: status.text += "\nSHIELD  %03d %%\nENERGY  %03d %%" % [ship.shield,ship.energy]
 	var comfort = get_node("/root/FeedbackSettings")
@@ -109,6 +109,8 @@ func apply_cockpit_layout(active: bool) -> void:
 	$Help.offset_bottom = 150.0 if active else -18.0
 	$Help.text = "WASD / Space / Ctrl flight  •  Mouse aim  •  Q / E roll  •  Shift boost\nLMB cannons / RMB missile / V emitter  •  F interact  •  F5/F9 save/load  •  C cockpit  •  P sonar  •  L lights" if active else _help_text
 	$Help.add_theme_font_size_override("font_size",12 if active else 14)
+	if get_node("/root/GameFlow").session_active:
+		$Help.text += "  •  Esc/M pause" if OS.has_feature("web") else "  •  Esc pause"
 	if OS.has_feature("web"):
 		$Help.text = $Help.text.replace("F5/F9 save/load","J/K save/load").replace("Space / Ctrl","Space / Z")
 	if get_tree().current_scene.has_node("Mission"):

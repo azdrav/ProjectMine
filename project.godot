@@ -11,14 +11,15 @@ config_version=5
 [application]
 
 config/name="ProjectMine"
-config/version="1.2"
-run/main_scene="res://scenes/levels/deep_mine.tscn"
+config/version="1.3"
+run/main_scene="res://scenes/flow/main_menu.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 FeedbackSettings="*res://scripts/systems/feedback_settings.gd"
+GameFlow="*res://scripts/flow/game_flow.gd"
 WebTrial="*res://scripts/systems/web_trial.gd"
 
 [audio]
